@@ -412,22 +412,10 @@ from flask import Flask, render_template, request
 import pickle
 import numpy as np
 import re
-import os
-import gdown
 from gensim.models import Word2Vec
 from urllib.parse import urlparse
 
 app = Flask(__name__)
-
-# ============================================================
-# 🔥 DOWNLOAD WORD2VEC MODEL SAFELY
-# ============================================================
-W2V_PATH = "w2v_model.bin"
-W2V_URL = "https://drive.google.com/uc?id=1HUWeXgtQ0Ds8VxxKlpgTEyu4gLH-vC6h"
-
-if not os.path.exists(W2V_PATH):
-    print("Downloading Word2Vec model...")
-    gdown.download(W2V_URL, W2V_PATH, quiet=False)
 
 # ============================================================
 # Load Trained Artefacts
@@ -435,34 +423,45 @@ if not os.path.exists(W2V_PATH):
 xgb_model = pickle.load(open('phishing_xgb.pkl', 'rb'))
 scaler     = pickle.load(open('scaler.pkl', 'rb'))
 le         = pickle.load(open('label_encoder.pkl', 'rb'))
-w2v_model  = Word2Vec.load(W2V_PATH)
+w2v_model  = Word2Vec.load('w2v_model.bin')
 THRESHOLD  = pickle.load(open('threshold.pkl', 'rb'))
 
+# Derive the numeric label for "bad" from the encoder
+# (matches how bad_label was computed during training)
 label_map = dict(zip(le.classes_, le.transform(le.classes_)))
-BAD_LABEL = label_map['bad']
+BAD_LABEL  = label_map['bad']
+
 
 # ============================================================
-# Constants
+# Constants — must mirror notebook exactly
 # ============================================================
 SUSPICIOUS_TLDS = {'ru', 'cn', 'tk', 'ml', 'xyz', 'info', 'top', 'gq', 'ga', 'cf', 'pw'}
 
 TRUSTED_DOMAINS = {
+    # Major tech & services
     'google.com', 'apple.com', 'amazon.com', 'facebook.com',
     'microsoft.com', 'github.com', 'wikipedia.org', 'linkedin.com',
     'twitter.com', 'youtube.com', 'netflix.com', 'reddit.com',
     'stackoverflow.com', 'nytimes.com', 'bbc.com',
+    # Finance & payments
     'paypal.com', 'stripe.com', 'chase.com', 'bankofamerica.com',
+    # Developer tools
     'rawgit.com', 'jsdelivr.net', 'cloudflare.com', 'npmjs.com',
     'pypi.org', 'anaconda.com', 'heroku.com', 'vercel.app',
+    # Email providers
     'gmail.com', 'outlook.com', 'yahoo.com', 'protonmail.com',
+    # Shopping
     'ebay.com', 'walmart.com', 'flipkart.com', 'shopify.com',
+    # Indian trusted domains
     'irctc.co.in', 'sbi.co.in', 'hdfcbank.com', 'icicibank.com',
 }
 
+
 # ============================================================
-# Helpers
+# Preprocessing Helpers — identical to notebook
 # ============================================================
 def normalize_url(url: str) -> str:
+    """Prepend http:// if no scheme present (fixes urlparse edge case)."""
     url = url.strip()
     if not url.startswith(("http://", "https://")):
         url = "http://" + url
@@ -470,111 +469,209 @@ def normalize_url(url: str) -> str:
 
 
 def is_trusted_domain(url: str) -> bool:
+    """Return True if the URL's root domain is in the trusted list.
+    Matches subdomains too: accounts.google.com → google.com ✓
+    """
     netloc = urlparse(url).netloc.lower()
-    parts = netloc.replace("www.", "").split(".")
-    root_domain = ".".join(parts[-2:]) if len(parts) >= 2 else netloc
-    return root_domain in TRUSTED_DOMAINS
+    parts  = netloc.replace("www.", "").split(".")
+    root   = ".".join(parts[-2:]) if len(parts) >= 2 else netloc
+    return root in TRUSTED_DOMAINS
 
 
 def extract_features(url: str) -> list:
+    """
+    10 structural features — must stay in sync with the notebook.
+    Returns a zero-vector on any parsing error (safe fallback).
+    """
     try:
         parsed = urlparse(url)
         netloc = parsed.netloc.lower()
-        tld = netloc.split('.')[-1] if '.' in netloc else ''
+        tld    = netloc.split('.')[-1] if '.' in netloc else ''
 
-        is_http = 1 if parsed.scheme == "http" else 0
-        url_length = len(url)
-        subdomain_count = max(len(netloc.split('.')) - 2, 0)
-        dot_count = url.count('.')
-        has_ip = 1 if re.search(r'(\d{1,3}\.){3}\d{1,3}', netloc) else 0
-        suspicious_chars = sum(c in url for c in ['@', '%', '-', '?', '=', '~'])
+        is_http           = 1 if parsed.scheme == "http" else 0
+        url_length        = len(url)
+        subdomain_count   = max(len(netloc.split('.')) - 2, 0)
+        dot_count         = url.count('.')
+        has_ip            = 1 if re.search(r'(\d{1,3}\.){3}\d{1,3}', netloc) else 0
+        suspicious_chars  = sum(c in url for c in ['@', '%', '-', '?', '=', '~'])
         has_suspicious_tld = 1 if tld in SUSPICIOUS_TLDS else 0
-        has_double_slash = 1 if '//' in url[8:] else 0
+        has_double_slash  = 1 if '//' in url[8:] else 0
 
-        prob = [float(url.count(c)) / len(url) for c in set(url)]
+        prob    = [float(url.count(c)) / len(url) for c in set(url)]
         entropy = -sum(p * np.log2(p) for p in prob if p > 0)
 
+        # Extract root domain so subdomains (accounts.google.com,
+        # mail.google.com, etc.) correctly match the trusted list
         netloc_parts = netloc.replace("www.", "").split(".")
-        root_domain = ".".join(netloc_parts[-2:]) if len(netloc_parts) >= 2 else netloc
-        is_trusted = 1 if root_domain in TRUSTED_DOMAINS else 0
+        root_domain  = ".".join(netloc_parts[-2:]) if len(netloc_parts) >= 2 else netloc
+        is_trusted   = 1 if root_domain in TRUSTED_DOMAINS else 0
 
         return [
             is_http, url_length, subdomain_count, dot_count,
             has_ip, suspicious_chars, has_suspicious_tld,
             has_double_slash, entropy, is_trusted,
         ]
-    except:
+
+    except Exception:
         return [0] * 10
 
 
-def tokenize_url(url: str):
-    return [t for t in re.split(r'\W+', url.lower()) if t]
+def tokenize_url(url: str) -> list:
+    """Split URL into lowercase tokens, drop empty strings."""
+    tokens = re.split(r'\W+', url.lower())
+    return [t for t in tokens if t]
 
 
-def embed_tokens(tokens):
+def embed_tokens(tokens: list) -> np.ndarray:
+    """Average Word2Vec vectors; zero-vector if no known tokens."""
     known = [t for t in tokens if t in w2v_model.wv]
     if not known:
         return np.zeros(w2v_model.vector_size)
     return np.mean([w2v_model.wv[t] for t in known], axis=0)
 
 
-def predict_url(url: str):
-    struct = np.array(extract_features(url)).reshape(1, -1)
-    embed = embed_tokens(tokenize_url(url)).reshape(1, -1)
+def predict_url(url: str) -> dict:
+    """
+    Full inference pipeline — mirrors notebook Section 16.
 
-    X = np.hstack([struct * 5, embed])
+    Returns:
+        label      : 'bad' or 'good'
+        confidence : probability of being BAD (0–100 %)
+        prob       : raw probability float (0–1)
+        risk       : 'HIGH', 'MEDIUM', or 'LOW'
+    """
+    struct = np.array(extract_features(url)).reshape(1, -1)
+    embed  = embed_tokens(tokenize_url(url)).reshape(1, -1)
+
+    X        = np.hstack([struct * 5, embed])   # same weighting as training
     X_scaled = scaler.transform(X)
 
+    # Column 0 = P(bad) — must match the column used during threshold tuning
     prob_bad = xgb_model.predict_proba(X_scaled)[0][0]
-    label = 'bad' if prob_bad >= THRESHOLD else 'good'
+    label    = 'bad' if prob_bad >= THRESHOLD else 'good'
 
-    risk = "HIGH" if prob_bad >= 0.75 else "MEDIUM" if prob_bad >= THRESHOLD else "LOW"
+    if prob_bad >= 0.75:
+        risk = 'HIGH'
+    elif prob_bad >= THRESHOLD:
+        risk = 'MEDIUM'
+    else:
+        risk = 'LOW'
 
-    return label, prob_bad, risk
+    return {
+        'label':      label,
+        'confidence': round(prob_bad * 100, 2),
+        'prob':       float(prob_bad),
+        'risk':       risk,
+    }
 
 
 # ============================================================
-# Routes
+# Explanation Builder
+# ============================================================
+def build_explanation(url: str, result: dict) -> list:
+    """Generate human-readable reasons for the prediction."""
+    reasons = []
+    parsed  = urlparse(url)
+
+    if parsed.scheme == "http":
+        reasons.append("Uses HTTP instead of HTTPS")
+    if len(url) > 75:
+        reasons.append("URL is unusually long")
+    if re.search(r'(\d{1,3}\.){3}\d{1,3}', parsed.netloc):
+        reasons.append("IP address used instead of a domain name")
+    if any(c in url for c in ['@', '%', '~']):
+        reasons.append("Suspicious characters detected (@, %, ~)")
+    tld = parsed.netloc.split('.')[-1] if '.' in parsed.netloc else ''
+    if tld in SUSPICIOUS_TLDS:
+        reasons.append(f"Suspicious top-level domain (.{tld})")
+    if '//' in url[8:]:
+        reasons.append("Double-slash redirect trick detected")
+    if result['prob'] >= 0.75:
+        reasons.append("Very high phishing probability from ML model")
+    elif result['prob'] >= THRESHOLD:
+        reasons.append("Elevated phishing probability from ML model")
+
+    # Fallback so the list is never empty on a bad prediction
+    if result['label'] == 'bad' and not reasons:
+        reasons.append("Suspicious structural patterns detected in URL")
+
+    return reasons
+
+
+# ============================================================
+# Flask Routes
 # ============================================================
 @app.route("/", methods=['GET', 'POST'])
 def home():
-    predict = None
-    url_input = ""
-    risk = None
+    predict     = None
+    explanation = []
+    url_input   = ""
+    risk_level  = None
 
     if request.method == "POST":
         url_input = request.form.get('url', '').strip()
 
+        # --- Empty input guard ---
         if not url_input:
-            return render_template("home.html", predict="Enter a valid URL")
-
-        url_input = normalize_url(url_input)
-
-        if is_trusted_domain(url_input):
+            predict = "Please enter a valid URL."
             return render_template(
                 "home.html",
-                predict="✅ Safe (Trusted Domain)",
-                risk="LOW",
-                url_value=url_input
+                predict=predict, explanation=explanation,
+                url_value=url_input, risk=risk_level,
             )
 
-        try:
-            label, prob, risk = predict_url(url_input)
+        # --- Normalise (add scheme if missing) ---
+        url_input = normalize_url(url_input)
 
-            if label == 'bad':
-                predict = f"🚨 Phishing ({prob * 100:.2f}%)"
+        # --- Trusted domain shortcut ---
+        if is_trusted_domain(url_input):
+            predict     = "✅ This site is Safe (Trusted Domain)"
+            explanation = ["Recognised as a globally trusted domain"]
+            risk_level  = "LOW"
+            return render_template(
+                "home.html",
+                predict=predict, explanation=explanation,
+                url_value=url_input, risk=risk_level,
+            )
+
+        # --- ML Prediction ---
+        try:
+            result     = predict_url(url_input)
+            risk_level = result['risk']
+            explanation = build_explanation(url_input, result)
+
+            # Secondary safety net: if model says bad but confidence is
+            # borderline (< 80%) and URL has no strong phishing signals
+            # (no IP, no suspicious TLD, uses HTTPS), downgrade to safe.
+            parsed_check = urlparse(url_input)
+            tld_check    = parsed_check.netloc.split(".")[-1]
+            has_ip       = bool(re.search(r'(\d{1,3}\.){3}\d{1,3}', parsed_check.netloc))
+            sus_tld      = tld_check in SUSPICIOUS_TLDS
+            is_https     = url_input.startswith("https://")
+
+            if (result['label'] == 'bad'
+                    and result['prob'] < 0.85
+                    and not has_ip
+                    and not sus_tld):
+                risk_level  = "LOW"
+                safe_conf   = round((1 - result['prob']) * 100, 1)
+                predict     = f"✅ This site appears Safe — {safe_conf:.1f}% confidence"
+                explanation = ["No strong phishing signals detected (no IP, no suspicious TLD)"]
+            elif result['label'] == 'bad':
+                predict = f"🚨 Phishing Detected — {result['confidence']:.1f}% confidence ({risk_level} risk)"
             else:
-                predict = f"✅ Safe ({(1 - prob) * 100:.2f}%)"
+                safe_conf = round((1 - result['prob']) * 100, 1)
+                predict   = f"✅ This site appears Safe — {safe_conf:.1f}% confidence"
 
         except Exception as e:
-            print(e)
-            predict = "Prediction Error"
+            print(f"[ERROR] Prediction failed for '{url_input}': {e}")
+            predict     = "⚠️ Prediction error. Please try again."
+            explanation = ["An internal error occurred during analysis."]
 
     return render_template(
         "home.html",
-        predict=predict,
-        url_value=url_input,
-        risk=risk
+        predict=predict, explanation=explanation,
+        url_value=url_input, risk=risk_level,
     )
 
 
@@ -588,9 +685,6 @@ def details():
     return render_template("details.html")
 
 
-# ============================================================
-# Run (Render / Production Ready)
-# ============================================================
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+    # Port 7860 is required for Hugging Face Spaces
+    app.run(host="0.0.0.0", port=7860, debug=False)
