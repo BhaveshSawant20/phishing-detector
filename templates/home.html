@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="https://cdn.tailwindcss.com"></script>
+<title>True Link - Home</title>
+<style>
+  body {
+    background: url('{{ url_for("static", filename="background.png") }}') no-repeat center center fixed;
+    background-size: cover;
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    margin: 0;
+  }
+  .glass {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+    padding: 2rem;
+    margin: 1rem;
+    transition: all 0.3s ease;
+  }
+  .glass:hover {
+    background: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+  }
+  @media (max-width: 640px) {
+    .glass { padding: 1.5rem; margin: 1rem 0.5rem; }
+  }
+  nav a { transition: all 0.2s ease; }
+  button { cursor: pointer; font-weight: 600; border-radius: 12px; transition: all 0.2s ease; }
+
+  /* Pulse animation for phishing result */
+  @keyframes pulse-red {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.4); }
+    50%       { box-shadow: 0 0 0 10px rgba(239,68,68,0); }
+  }
+  .pulse-red { animation: pulse-red 1.5s infinite; }
+</style>
+</head>
+
+<body class="text-white">
+
+<!-- Navbar -->
+<nav class="fixed top-0 left-0 w-full flex justify-between items-center px-6 py-3 bg-black/30 backdrop-blur-lg border-b border-white/20 z-50">
+  <div class="flex items-center gap-4">
+    <img src="{{ url_for('static', filename='truelink.png') }}" class="h-12 md:h-20">
+  </div>
+
+  <div class="absolute left-1/2 transform -translate-x-1/2">
+    <span class="text-2xl md:text-3xl font-bold text-white">True Link</span>
+  </div>
+
+  <div class="flex gap-4 md:gap-8 font-semibold text-sm md:text-base">
+    <a href="{{ url_for('home') }}"    class="{% if request.path == '/' %}text-indigo-400{% else %}text-white{% endif %} hover:text-indigo-300">Home</a>
+    <a href="{{ url_for('team') }}"    class="{% if request.path == '/team' %}text-indigo-400{% else %}text-white{% endif %} hover:text-indigo-300">Team</a>
+    <a href="{{ url_for('details') }}" class="{% if request.path == '/details' %}text-indigo-400{% else %}text-white{% endif %} hover:text-indigo-300">Details</a>
+  </div>
+</nav>
+
+<!-- Main -->
+<section class="flex justify-center items-center" style="min-height: calc(100vh - 80px); padding-top: 80px;">
+  <div class="glass p-8 w-full max-w-2xl text-center">
+
+    <h1 class="text-2xl font-bold mb-2">🔍 URL Phishing Detector</h1>
+    <p class="text-sm text-white/60 mb-6">Enter any URL to check if it's safe or a phishing site</p>
+
+    <form method="POST">
+      <div class="flex flex-col sm:flex-row gap-3">
+        <input
+          name="url"
+          value="{{ url_value }}"
+          placeholder="https://example.com"
+          autocomplete="off"
+          class="flex-1 p-3 rounded-xl text-black outline-none text-sm"
+        >
+        <button
+          type="submit"
+          class="bg-indigo-600 px-6 py-3 rounded-xl hover:bg-indigo-700 text-white text-sm whitespace-nowrap"
+        >
+          CHECK URL
+        </button>
+      </div>
+    </form>
+
+    <!-- Result + Explanation (hidden together when input is cleared) -->
+    <div id="result-section" {% if not predict %}style="display:none"{% endif %}>
+
+      {% if predict %}
+      <div class="mt-6">
+        {% if "Phishing" in predict %}
+          {% if risk == "HIGH" %}
+            <div class="inline-block bg-red-600 pulse-red px-5 py-3 rounded-xl text-white font-semibold text-base">
+              🚨 {{ predict }}
+            </div>
+          {% elif risk == "MEDIUM" %}
+            <div class="inline-block bg-orange-500 px-5 py-3 rounded-xl text-white font-semibold text-base">
+              ⚠️ {{ predict }}
+            </div>
+          {% else %}
+            <div class="inline-block bg-yellow-500 px-5 py-3 rounded-xl text-white font-semibold text-base">
+              ⚠️ {{ predict }}
+            </div>
+          {% endif %}
+        {% elif "Error" in predict or "error" in predict %}
+          <div class="inline-block bg-gray-600 px-5 py-3 rounded-xl text-white font-semibold text-base">
+            ⚠️ {{ predict }}
+          </div>
+        {% else %}
+          <div class="inline-block bg-green-600 px-5 py-3 rounded-xl text-white font-semibold text-base">
+            ✅ {{ predict }}
+          </div>
+        {% endif %}
+      </div>
+      {% endif %}
+
+      {% if explanation %}
+      <div class="mt-6 text-left glass p-4">
+        <h3 class="font-bold text-base mb-2">💡 Why this result?</h3>
+        <ul class="list-disc ml-5 text-sm space-y-1 text-white/90">
+          {% for item in explanation %}
+            <li>{{ item }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+
+    </div>
+
+    <!-- Tips (hidden when result is showing) -->
+    <div id="tips-section" {% if predict %}style="display:none"{% endif %}>
+      <div class="mt-6 text-left text-white/50 text-xs space-y-1">
+        <p>💡 Tips: Include the full URL with https:// or http://</p>
+        <p>💡 Try testing known safe sites like https://www.google.com</p>
+        <p>💡 Suspicious TLDs like .tk .ml .xyz .ru are red flags</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<script>
+  const urlInput = document.querySelector('input[name="url"]');
+  const resultSection = document.getElementById('result-section');
+  const tipsSection = document.getElementById('tips-section');
+
+  urlInput.addEventListener('input', function () {
+    if (this.value.trim() === '') {
+      // Hide result + explanation, show tips
+      if (resultSection) resultSection.style.display = 'none';
+      if (tipsSection)   tipsSection.style.display   = 'block';
+    } else {
+      // If user starts typing again after clearing, keep tips hidden
+      if (tipsSection) tipsSection.style.display = 'none';
+    }
+  });
+</script>
+</body>
+</html>
