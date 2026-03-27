@@ -51,14 +51,39 @@
 
 <!-- Navbar -->
 <nav class="fixed top-0 left-0 w-full bg-black/40 backdrop-blur-lg border-b border-white/20 z-50">
-  <div class="flex justify-between items-center px-3 sm:px-6 py-2 sm:py-3">
-    <img src="{{ url_for('static', filename='truelink.png') }}" class="h-14 sm:h-16 md:h-20 lg:h-24 w-auto flex-shrink-0">
-    <span class="text-base sm:text-xl md:text-3xl font-bold text-white absolute left-1/2 transform -translate-x-1/2 whitespace-nowrap">True Link</span>
-    <div class="flex gap-2 sm:gap-5 font-semibold text-xs sm:text-sm md:text-base flex-shrink-0">
-      <a href="{{ url_for('home') }}"    class="{% if request.path == '/' %}text-indigo-400{% else %}text-white{% endif %} hover:text-indigo-300">Home</a>
-      <a href="{{ url_for('team') }}"    class="{% if request.path == '/team' %}text-indigo-400{% else %}text-white{% endif %} hover:text-indigo-300">Team</a>
-      <a href="{{ url_for('details') }}" class="{% if request.path == '/details' %}text-indigo-400{% else %}text-white{% endif %} hover:text-indigo-300">Details</a>
+  <div class="relative flex items-center justify-between px-3 sm:px-6 py-3 sm:py-4">
+
+    <!-- Left: Logo -->
+    <div class="flex items-center">
+      <img src="{{ url_for('static', filename='truelink.png') }}"
+           class="h-12 sm:h-16 md:h-20 lg:h-24 w-auto">
     </div>
+
+    <!-- Center: Title -->
+    <div class="absolute left-1/2 transform -translate-x-1/2">
+      <span class="text-lg sm:text-2xl md:text-3xl font-bold text-white whitespace-nowrap">
+        True Link
+      </span>
+    </div>
+
+    <!-- Right: Menu -->
+    <div class="flex items-center gap-5 sm:gap-8 md:gap-10 pr-2 sm:pr-4 text-sm sm:text-base md:text-lg font-semibold">
+      <a href="{{ url_for('home') }}"
+         class="{% if request.path == '/' %}text-indigo-400{% else %}text-white{% endif %} hover:text-indigo-300 transition">
+        Home
+      </a>
+
+      <a href="{{ url_for('team') }}"
+         class="{% if request.path == '/team' %}text-indigo-400{% else %}text-white{% endif %} hover:text-indigo-300 transition">
+        Team
+      </a>
+
+      <a href="{{ url_for('details') }}"
+         class="{% if request.path == '/details' %}text-indigo-400{% else %}text-white{% endif %} hover:text-indigo-300 transition">
+        Details
+      </a>
+    </div>
+
   </div>
 </nav>
 
