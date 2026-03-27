@@ -1,6 +1,6 @@
-flask
-numpy
-scikit-learn
-xgboost
-gensim
-pandas
+flask==3.0.3
+numpy==1.26.4
+scikit-learn==1.4.2
+xgboost==2.0.3
+gensim==4.3.2
+pandas==2.2.2

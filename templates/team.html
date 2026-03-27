@@ -57,7 +57,7 @@
 <!-- Navbar -->
 <nav class="fixed top-0 left-0 w-full bg-black/40 backdrop-blur-lg border-b border-white/20 z-50">
   <div class="flex justify-between items-center px-3 sm:px-6 py-2 sm:py-3">
-    <img src="{{ url_for('static', filename='truelink.png') }}" class="h-8 sm:h-12 md:h-16 flex-shrink-0">
+    <img src="{{ url_for('static', filename='truelink.png') }}" class="h-14 sm:h-16 md:h-20 lg:h-24 w-auto flex-shrink-0">
     <span class="text-base sm:text-xl md:text-3xl font-bold text-white absolute left-1/2 transform -translate-x-1/2 whitespace-nowrap">True Link</span>
     <div class="flex gap-2 sm:gap-5 font-semibold text-xs sm:text-sm md:text-base flex-shrink-0">
       <a href="{{ url_for('home') }}"    class="{% if request.path == '/' %}text-indigo-400{% else %}text-white{% endif %} hover:text-indigo-300">Home</a>
@@ -79,7 +79,7 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
 
         <!-- Shivamani -->
-        <div class="member-card">
+        <a href="https://www.linkedin.com/in/shivamanitalakokkula/" target="_blank" class="member-card block">
           <div class="avatar-wrap">
             <img src="{{ url_for('static', filename='shivamani.png') }}" alt="Shivamani"
               onerror="this.style.display='none'; this.parentNode.innerHTML='👤';">
@@ -88,12 +88,12 @@
           <p class="text-indigo-300 text-xs sm:text-sm">Backend Developer</p>
           <p class="text-white/40 text-xs mt-1">IEN: 12317043</p>
           <p class="text-white/60 text-xs mt-2 px-1">
-            Built the Flask backend and core detection logic — handling URL processing, model inference, and API routing.
+            Built the Flask backend and core detection logic handling URL processing, model inference, and API routing.
           </p>
-        </div>
+        </a>
 
         <!-- Yash -->
-        <div class="member-card">
+        <a href="https://www.linkedin.com/in/yash-mandavkar-3a41192a0/" target="_blank" class="member-card block">
           <div class="avatar-wrap">
             <img src="{{ url_for('static', filename='yash.png') }}" alt="Yash"
               onerror="this.style.display='none'; this.parentNode.innerHTML='👤';">
@@ -104,10 +104,10 @@
           <p class="text-white/60 text-xs mt-2 px-1">
             Sourced and prepared the phishing dataset, trained the XGBoost model using Kaggle and Jupyter, and tuned it for accuracy.
           </p>
-        </div>
+        </a>
 
         <!-- Yugant -->
-        <div class="member-card">
+        <a href="https://www.linkedin.com/in/yugant-belokar-974923315/" target="_blank" class="member-card block">
           <div class="avatar-wrap">
             <img src="{{ url_for('static', filename='yugant.png') }}" alt="Yugant"
               onerror="this.style.display='none'; this.parentNode.innerHTML='👤';">
@@ -116,12 +116,12 @@
           <p class="text-indigo-300 text-xs sm:text-sm">Frontend Developer</p>
           <p class="text-white/40 text-xs mt-1">IEN: 12347047</p>
           <p class="text-white/60 text-xs mt-2 px-1">
-            Designed and built the entire UI — including the glassmorphism layout, result display, and responsive pages.
+            Designed and built the entire UI like including the glassmorphism layout, result display, and responsive pages.
           </p>
-        </div>
+        </a>
 
         <!-- Bhavesh -->
-        <div class="member-card">
+        <a href="https://www.linkedin.com/in/bhaveshsawant20/" target="_blank" class="member-card block">
           <div class="avatar-wrap">
             <img src="{{ url_for('static', filename='bhavesh.png') }}" alt="Bhavesh"
               onerror="this.style.display='none'; this.parentNode.innerHTML='👤';">
@@ -130,9 +130,10 @@
           <p class="text-indigo-300 text-xs sm:text-sm">Project Lead</p>
           <p class="text-white/40 text-xs mt-1">IEN: 12217028</p>
           <p class="text-white/60 text-xs mt-2 px-1">
-            Led the project end-to-end — coordinating the team, reviewing code, identifying logic issues, and testing the system across all components.
+            Led the project end-to-end coordinating the team, reviewing code, identifying logic issues, and testing the system across all components.
           </p>
-        </div>
+          
+        </a>
 
       </div>
     </div>
