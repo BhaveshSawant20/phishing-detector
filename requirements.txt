@@ -3,3 +3,5 @@ numpy==1.26.4
 scikit-learn==1.7.2
 xgboost==3.2.0
 gensim==4.4.0
+gunicorn
+pandas==2.0.3
