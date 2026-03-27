@@ -198,38 +198,236 @@
 
 
 
+# from flask import Flask, render_template, request
+# import pickle
+# import numpy as np
+# import re
+# import os
+# import requests
+# from gensim.models import Word2Vec
+# from urllib.parse import urlparse
+
+# app = Flask(__name__)
+
+# # ============================================================
+# # 🔥 DOWNLOAD MODEL (CRITICAL FIX)
+# # ============================================================
+# def download_file(url, filename):
+#     if not os.path.exists(filename):
+#         print(f"Downloading {filename}...")
+#         response = requests.get(url, stream=True)
+
+#         if response.status_code != 200:
+#             raise Exception("Failed to download model")
+
+#         with open(filename, "wb") as f:
+#             for chunk in response.iter_content(1024):
+#                 if chunk:
+#                     f.write(chunk)
+
+# # 🔥 Your Google Drive Direct Link
+# W2V_URL = "https://drive.google.com/uc?export=download&id=1HUWeXgtQ0Ds8VxxKlpgTEyu4gLH-vC6h"
+
+# download_file(W2V_URL, "w2v_model.bin")
+
+
+# # ============================================================
+# # Load Trained Artefacts
+# # ============================================================
+# xgb_model = pickle.load(open('phishing_xgb.pkl', 'rb'))
+# scaler     = pickle.load(open('scaler.pkl', 'rb'))
+# le         = pickle.load(open('label_encoder.pkl', 'rb'))
+# w2v_model  = Word2Vec.load('w2v_model.bin')
+# THRESHOLD  = pickle.load(open('threshold.pkl', 'rb'))
+
+# label_map = dict(zip(le.classes_, le.transform(le.classes_)))
+# BAD_LABEL  = label_map['bad']
+
+
+# # ============================================================
+# # Constants
+# # ============================================================
+# SUSPICIOUS_TLDS = {'ru', 'cn', 'tk', 'ml', 'xyz', 'info', 'top', 'gq', 'ga', 'cf', 'pw'}
+
+# TRUSTED_DOMAINS = {
+#     'google.com', 'apple.com', 'amazon.com', 'facebook.com',
+#     'microsoft.com', 'github.com', 'wikipedia.org', 'linkedin.com',
+#     'twitter.com', 'youtube.com', 'netflix.com', 'reddit.com',
+#     'stackoverflow.com', 'nytimes.com', 'bbc.com',
+#     'paypal.com', 'stripe.com', 'chase.com', 'bankofamerica.com',
+#     'rawgit.com', 'jsdelivr.net', 'cloudflare.com', 'npmjs.com',
+#     'pypi.org', 'anaconda.com', 'heroku.com', 'vercel.app',
+#     'gmail.com', 'outlook.com', 'yahoo.com', 'protonmail.com',
+#     'ebay.com', 'walmart.com', 'flipkart.com', 'shopify.com',
+#     'irctc.co.in', 'sbi.co.in', 'hdfcbank.com', 'icicibank.com',
+# }
+
+
+# # ============================================================
+# # Helpers
+# # ============================================================
+# def normalize_url(url: str) -> str:
+#     url = url.strip()
+#     if not url.startswith(("http://", "https://")):
+#         url = "http://" + url
+#     return url
+
+
+# def is_trusted_domain(url: str) -> bool:
+#     netloc = urlparse(url).netloc.lower()
+#     parts  = netloc.replace("www.", "").split(".")
+#     root   = ".".join(parts[-2:]) if len(parts) >= 2 else netloc
+#     return root in TRUSTED_DOMAINS
+
+
+# def extract_features(url: str) -> list:
+#     try:
+#         parsed = urlparse(url)
+#         netloc = parsed.netloc.lower()
+#         tld    = netloc.split('.')[-1] if '.' in netloc else ''
+
+#         is_http = 1 if parsed.scheme == "http" else 0
+#         url_length = len(url)
+#         subdomain_count = max(len(netloc.split('.')) - 2, 0)
+#         dot_count = url.count('.')
+#         has_ip = 1 if re.search(r'(\d{1,3}\.){3}\d{1,3}', netloc) else 0
+#         suspicious_chars = sum(c in url for c in ['@', '%', '-', '?', '=', '~'])
+#         has_suspicious_tld = 1 if tld in SUSPICIOUS_TLDS else 0
+#         has_double_slash = 1 if '//' in url[8:] else 0
+
+#         prob = [float(url.count(c)) / len(url) for c in set(url)]
+#         entropy = -sum(p * np.log2(p) for p in prob if p > 0)
+
+#         netloc_parts = netloc.replace("www.", "").split(".")
+#         root_domain = ".".join(netloc_parts[-2:])
+#         is_trusted = 1 if root_domain in TRUSTED_DOMAINS else 0
+
+#         return [
+#             is_http, url_length, subdomain_count, dot_count,
+#             has_ip, suspicious_chars, has_suspicious_tld,
+#             has_double_slash, entropy, is_trusted,
+#         ]
+#     except:
+#         return [0]*10
+
+
+# def tokenize_url(url: str):
+#     return [t for t in re.split(r'\W+', url.lower()) if t]
+
+
+# def embed_tokens(tokens):
+#     known = [t for t in tokens if t in w2v_model.wv]
+#     if not known:
+#         return np.zeros(w2v_model.vector_size)
+#     return np.mean([w2v_model.wv[t] for t in known], axis=0)
+
+
+# def predict_url(url: str):
+#     struct = np.array(extract_features(url)).reshape(1, -1)
+#     embed  = embed_tokens(tokenize_url(url)).reshape(1, -1)
+
+#     X = np.hstack([struct * 5, embed])
+#     X_scaled = scaler.transform(X)
+
+#     prob_bad = xgb_model.predict_proba(X_scaled)[0][0]
+#     label = 'bad' if prob_bad >= THRESHOLD else 'good'
+
+#     risk = "HIGH" if prob_bad >= 0.75 else "MEDIUM" if prob_bad >= THRESHOLD else "LOW"
+
+#     return label, prob_bad, risk
+
+
+# # ============================================================
+# # Routes
+# # ============================================================
+# @app.route("/", methods=['GET', 'POST'])
+# def home():
+#     predict = None
+#     explanation = []
+#     url_input = ""
+#     risk = None
+
+#     if request.method == "POST":
+#         url_input = request.form.get('url', '').strip()
+
+#         if not url_input:
+#             predict = "Enter a valid URL"
+#             return render_template("home.html", predict=predict)
+
+#         url_input = normalize_url(url_input)
+
+#         if is_trusted_domain(url_input):
+#             return render_template("home.html",
+#                                    predict="✅ Safe (Trusted Domain)",
+#                                    risk="LOW")
+
+#         try:
+#             label, prob, risk = predict_url(url_input)
+
+#             if label == 'bad':
+#                 predict = f"🚨 Phishing ({prob*100:.2f}%)"
+#             else:
+#                 predict = f"✅ Safe ({(1-prob)*100:.2f}%)"
+
+#         except Exception as e:
+#             print(e)
+#             predict = "Prediction Error"
+
+#     return render_template("home.html",
+#                            predict=predict,
+#                            url_value=url_input,
+#                            risk=risk)
+
+
+# @app.route("/team")
+# def team():
+#     return render_template("team.html")
+
+
+# @app.route("/details")
+# def details():
+#     return render_template("details.html")
+
+
+# # ============================================================
+# # Run (DEPLOYMENT READY)
+# # ============================================================
+# if __name__ == "__main__":
+#     port = int(os.environ.get("PORT", 5000))
+#     app.run(host="0.0.0.0", port=port)
+
+
+
+
+
+
+
+
+
+
+
+
+
 from flask import Flask, render_template, request
 import pickle
 import numpy as np
 import re
 import os
-import requests
+import gdown
 from gensim.models import Word2Vec
 from urllib.parse import urlparse
 
 app = Flask(__name__)
 
 # ============================================================
-# 🔥 DOWNLOAD MODEL (CRITICAL FIX)
+# 🔥 DOWNLOAD WORD2VEC MODEL SAFELY
 # ============================================================
-def download_file(url, filename):
-    if not os.path.exists(filename):
-        print(f"Downloading {filename}...")
-        response = requests.get(url, stream=True)
+W2V_PATH = "w2v_model.bin"
+W2V_URL = "https://drive.google.com/uc?id=1HUWeXgtQ0Ds8VxxKlpgTEyu4gLH-vC6h"
 
-        if response.status_code != 200:
-            raise Exception("Failed to download model")
-
-        with open(filename, "wb") as f:
-            for chunk in response.iter_content(1024):
-                if chunk:
-                    f.write(chunk)
-
-# 🔥 Your Google Drive Direct Link
-W2V_URL = "https://drive.google.com/uc?export=download&id=1HUWeXgtQ0Ds8VxxKlpgTEyu4gLH-vC6h"
-
-download_file(W2V_URL, "w2v_model.bin")
-
+if not os.path.exists(W2V_PATH):
+    print("Downloading Word2Vec model...")
+    gdown.download(W2V_URL, W2V_PATH, quiet=False)
 
 # ============================================================
 # Load Trained Artefacts
@@ -237,12 +435,11 @@ download_file(W2V_URL, "w2v_model.bin")
 xgb_model = pickle.load(open('phishing_xgb.pkl', 'rb'))
 scaler     = pickle.load(open('scaler.pkl', 'rb'))
 le         = pickle.load(open('label_encoder.pkl', 'rb'))
-w2v_model  = Word2Vec.load('w2v_model.bin')
+w2v_model  = Word2Vec.load(W2V_PATH)
 THRESHOLD  = pickle.load(open('threshold.pkl', 'rb'))
 
 label_map = dict(zip(le.classes_, le.transform(le.classes_)))
-BAD_LABEL  = label_map['bad']
-
+BAD_LABEL = label_map['bad']
 
 # ============================================================
 # Constants
@@ -262,7 +459,6 @@ TRUSTED_DOMAINS = {
     'irctc.co.in', 'sbi.co.in', 'hdfcbank.com', 'icicibank.com',
 }
 
-
 # ============================================================
 # Helpers
 # ============================================================
@@ -275,16 +471,16 @@ def normalize_url(url: str) -> str:
 
 def is_trusted_domain(url: str) -> bool:
     netloc = urlparse(url).netloc.lower()
-    parts  = netloc.replace("www.", "").split(".")
-    root   = ".".join(parts[-2:]) if len(parts) >= 2 else netloc
-    return root in TRUSTED_DOMAINS
+    parts = netloc.replace("www.", "").split(".")
+    root_domain = ".".join(parts[-2:]) if len(parts) >= 2 else netloc
+    return root_domain in TRUSTED_DOMAINS
 
 
 def extract_features(url: str) -> list:
     try:
         parsed = urlparse(url)
         netloc = parsed.netloc.lower()
-        tld    = netloc.split('.')[-1] if '.' in netloc else ''
+        tld = netloc.split('.')[-1] if '.' in netloc else ''
 
         is_http = 1 if parsed.scheme == "http" else 0
         url_length = len(url)
@@ -299,7 +495,7 @@ def extract_features(url: str) -> list:
         entropy = -sum(p * np.log2(p) for p in prob if p > 0)
 
         netloc_parts = netloc.replace("www.", "").split(".")
-        root_domain = ".".join(netloc_parts[-2:])
+        root_domain = ".".join(netloc_parts[-2:]) if len(netloc_parts) >= 2 else netloc
         is_trusted = 1 if root_domain in TRUSTED_DOMAINS else 0
 
         return [
@@ -308,7 +504,7 @@ def extract_features(url: str) -> list:
             has_double_slash, entropy, is_trusted,
         ]
     except:
-        return [0]*10
+        return [0] * 10
 
 
 def tokenize_url(url: str):
@@ -324,7 +520,7 @@ def embed_tokens(tokens):
 
 def predict_url(url: str):
     struct = np.array(extract_features(url)).reshape(1, -1)
-    embed  = embed_tokens(tokenize_url(url)).reshape(1, -1)
+    embed = embed_tokens(tokenize_url(url)).reshape(1, -1)
 
     X = np.hstack([struct * 5, embed])
     X_scaled = scaler.transform(X)
@@ -343,7 +539,6 @@ def predict_url(url: str):
 @app.route("/", methods=['GET', 'POST'])
 def home():
     predict = None
-    explanation = []
     url_input = ""
     risk = None
 
@@ -351,32 +546,36 @@ def home():
         url_input = request.form.get('url', '').strip()
 
         if not url_input:
-            predict = "Enter a valid URL"
-            return render_template("home.html", predict=predict)
+            return render_template("home.html", predict="Enter a valid URL")
 
         url_input = normalize_url(url_input)
 
         if is_trusted_domain(url_input):
-            return render_template("home.html",
-                                   predict="✅ Safe (Trusted Domain)",
-                                   risk="LOW")
+            return render_template(
+                "home.html",
+                predict="✅ Safe (Trusted Domain)",
+                risk="LOW",
+                url_value=url_input
+            )
 
         try:
             label, prob, risk = predict_url(url_input)
 
             if label == 'bad':
-                predict = f"🚨 Phishing ({prob*100:.2f}%)"
+                predict = f"🚨 Phishing ({prob * 100:.2f}%)"
             else:
-                predict = f"✅ Safe ({(1-prob)*100:.2f}%)"
+                predict = f"✅ Safe ({(1 - prob) * 100:.2f}%)"
 
         except Exception as e:
             print(e)
             predict = "Prediction Error"
 
-    return render_template("home.html",
-                           predict=predict,
-                           url_value=url_input,
-                           risk=risk)
+    return render_template(
+        "home.html",
+        predict=predict,
+        url_value=url_input,
+        risk=risk
+    )
 
 
 @app.route("/team")
@@ -390,7 +589,7 @@ def details():
 
 
 # ============================================================
-# Run (DEPLOYMENT READY)
+# Run (Render / Production Ready)
 # ============================================================
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
