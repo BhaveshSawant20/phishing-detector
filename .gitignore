@@ -6,10 +6,17 @@ venv/
 ENV/
 
 # ======================
-# Model Files (VERY IMPORTANT)
+# Model Files
 # ======================
 *.pkl
 *.bin
+
+# Allow required model files
+!phishing_xgb.pkl
+!scaler.pkl
+!label_encoder.pkl
+!threshold.pkl
+# (DO NOT allow w2v_model.bin — too large)
 
 # ======================
 # Python Cache
@@ -22,6 +29,7 @@ __pycache__/
 # Jupyter Notebook
 # ======================
 .ipynb_checkpoints/
+*.ipynb
 
 # ======================
 # Logs
@@ -39,5 +47,8 @@ Thumbs.db
 # ======================
 .vscode/
 .idea/
+
+# ======================
+# Dataset
+# ======================
 Dataset/
-*.ipynb
