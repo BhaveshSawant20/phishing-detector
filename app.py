@@ -684,6 +684,9 @@ def team():
 def details():
     return render_template("details.html")
 
+@app.route("/ping")
+def ping():
+    return "ok"
 
 if __name__ == "__main__":
     # Port 7860 is required for Hugging Face Spaces
