@@ -5,8 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script src="https://cdn.tailwindcss.com"></script>
 <title>True Link - Team</title>
+
 <style>
-  html, body { min-height: 100%; margin: 0; padding: 0; }
+  html, body {
+    min-height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
   body {
     background: url('{{ url_for("static", filename="background.png") }}') no-repeat center center fixed;
     background-size: cover;
@@ -14,6 +20,7 @@
     font-family: 'Inter', sans-serif;
     min-height: 100vh;
   }
+
   .glass {
     background: rgba(255, 255, 255, 0.08);
     backdrop-filter: blur(20px);
@@ -23,150 +30,150 @@
     padding: 1.5rem;
     margin: 1rem;
   }
+
   nav a { transition: all 0.2s ease; }
+
   .avatar-wrap {
-    width: 6rem; height: 6rem;
+    width: 6rem;
+    height: 6rem;
     border-radius: 9999px;
     overflow: hidden;
     margin: 0 auto;
     background: rgba(99,102,241,0.3);
-    display: flex; align-items: center; justify-content: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     font-size: 1.5rem;
     border: 2px solid rgba(255,255,255,0.2);
   }
-  .avatar-wrap img { width: 100%; height: 100%; object-fit: cover; }
+
+  .avatar-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* 🔥 Improved card */
   .member-card {
     transition: all 0.25s ease;
     border: 1px solid rgba(99,102,241,0.3);
     border-radius: 16px;
     padding: 1rem;
   }
+
   .member-card:hover {
     transform: translateY(-6px) scale(1.03);
     box-shadow: 0 12px 35px rgba(0,0,0,0.35);
     border-color: rgba(99,102,241,0.8);
   }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .page-content { animation: fadeIn 0.25s ease; }
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(6px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
+
 </style>
 </head>
 
 <body class="text-white">
 
-  <!-- Page transition overlay -->
-  <div id="page-overlay" style="position:fixed;inset:0;z-index:9999;background:#0f0f1a;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.2s ease;">
-    <div style="text-align:center">
-      <div style="width:40px;height:40px;border-radius:50%;border:3px solid rgba(255,255,255,0.1);border-top-color:#6366f1;animation:spin 0.7s linear infinite;margin:0 auto 12px;"></div>
-      <p style="color:rgba(255,255,255,0.5);font-size:0.8rem;font-family:Inter,sans-serif;">Loading...</p>
+<!-- Navbar -->
+<nav class="fixed top-0 left-0 w-full bg-black/40 backdrop-blur-lg border-b border-white/20 z-50">
+  <div class="flex flex-wrap items-center justify-between px-3 sm:px-6 py-3 sm:py-4">
+
+    <div class="flex items-center">
+      <img src="{{ url_for('static', filename='truelink.png') }}"
+           class="h-10 sm:h-14 md:h-16 lg:h-20 w-auto">
     </div>
-  </div>
 
-  <!-- Navbar -->
-  <nav class="fixed top-0 left-0 w-full bg-black/40 backdrop-blur-lg border-b border-white/20 z-50">
-    <div class="flex flex-wrap items-center justify-between px-3 sm:px-6 py-3 sm:py-4">
-      <div class="flex items-center">
-        <img src="{{ url_for('static', filename='truelink.png') }}" class="h-10 sm:h-14 md:h-16 lg:h-20 w-auto">
-      </div>
-      <div class="w-full sm:w-auto order-3 sm:order-2 text-center sm:absolute sm:left-1/2 sm:-translate-x-1/2 mt-2 sm:mt-0">
-        <span class="text-base sm:text-xl md:text-2xl font-bold">True Link</span>
-      </div>
-      <div class="flex items-center gap-3 sm:gap-6 md:gap-8 text-xs sm:text-sm md:text-base font-semibold order-2 sm:order-3">
-        <a href="{{ url_for('home') }}"    class="{% if request.path == '/' %}text-indigo-400{% else %}text-white{% endif %} hover:text-indigo-300">Home</a>
-        <a href="{{ url_for('team') }}"    class="{% if request.path == '/team' %}text-indigo-400{% else %}text-white{% endif %} hover:text-indigo-300">Team</a>
-        <a href="{{ url_for('details') }}" class="{% if request.path == '/details' %}text-indigo-400{% else %}text-white{% endif %} hover:text-indigo-300">Details</a>
+    <div class="w-full sm:w-auto order-3 sm:order-2 text-center sm:absolute sm:left-1/2 sm:-translate-x-1/2 mt-2 sm:mt-0">
+      <span class="text-base sm:text-xl md:text-2xl font-bold">
+        True Link
+      </span>
+    </div>
+
+    <div class="flex items-center gap-3 sm:gap-6 md:gap-8 text-xs sm:text-sm md:text-base font-semibold order-2 sm:order-3">
+      <a href="{{ url_for('home') }}"
+         class="{% if request.path == '/' %}text-indigo-400{% else %}text-white{% endif %} hover:text-indigo-300">
+        Home
+      </a>
+
+      <a href="{{ url_for('team') }}"
+         class="{% if request.path == '/team' %}text-indigo-400{% else %}text-white{% endif %} hover:text-indigo-300">
+        Team
+      </a>
+
+      <a href="{{ url_for('details') }}"
+         class="{% if request.path == '/details' %}text-indigo-400{% else %}text-white{% endif %} hover:text-indigo-300">
+        Details
+      </a>
+    </div>
+
+  </div>
+</nav>
+
+<!-- Team Section -->
+<div class="pt-28 pb-12 px-2">
+  <section class="flex justify-center mt-4">
+    <div class="glass w-full max-w-5xl text-center">
+
+      <h2 class="text-2xl sm:text-3xl font-bold mb-1">👥 Meet the Team</h2>
+      <p class="text-white/50 text-xs sm:text-sm mb-6">The people behind True Link</p>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+
+        <!-- Member -->
+        <a href="https://www.linkedin.com/in/shivamanitalakokkula/" target="_blank" class="member-card cursor-pointer">
+          <div class="avatar-wrap">
+            <img src="{{ url_for('static', filename='shivamani.png') }}" alt="Shivamani"
+              onerror="this.style.display='none'; this.parentNode.innerHTML='👤';">
+          </div>
+          <h3 class="mt-3 font-bold">Shivamani Talakokkula</h3>
+          <p class="text-indigo-300 text-sm">Backend Developer</p>
+          <p class="text-white/40 text-xs">IEN: 12317043</p>
+          <p class="text-white/70 text-xs mt-2">
+            Built the Flask backend and core detection logic handling URL processing, model inference, and API routing.
+          </p>
+        </a>
+
+        <a href="https://www.linkedin.com/in/yash-mandavkar-3a41192a0/" target="_blank" class="member-card cursor-pointer">
+          <div class="avatar-wrap">
+            <img src="{{ url_for('static', filename='yash.png') }}" alt="Yash"
+              onerror="this.style.display='none'; this.parentNode.innerHTML='👤';">
+          </div>
+          <h3 class="mt-3 font-bold">Yash Mandavkar</h3>
+          <p class="text-indigo-300 text-sm">Data Analyst</p>
+          <p class="text-white/40 text-xs">IEN: 12317048</p>
+          <p class="text-white/70 text-xs mt-2">
+            Sourced and prepared the phishing dataset, trained the XGBoost model using Kaggle and Jupyter, and tuned it for accuracy.
+          </p>
+        </a>
+
+        <a href="https://www.linkedin.com/in/yugant-belokar-974923315/" target="_blank" class="member-card cursor-pointer">
+          <div class="avatar-wrap">
+            <img src="{{ url_for('static', filename='yugant.png') }}" alt="Yugant"
+              onerror="this.style.display='none'; this.parentNode.innerHTML='👤';">
+          </div>
+          <h3 class="mt-3 font-bold">Yugant Belokar</h3>
+          <p class="text-indigo-300 text-sm">Frontend Developer</p>
+          <p class="text-white/40 text-xs">IEN: 12347047</p>
+          <p class="text-white/70 text-xs mt-2">
+            Designed and built the entire UI like including the glassmorphism layout, result display, and responsive pages.
+          </p>
+        </a>
+
+        <a href="https://www.linkedin.com/in/bhaveshsawant20/" target="_blank" class="member-card cursor-pointer">
+          <div class="avatar-wrap">
+            <img src="{{ url_for('static', filename='bhavesh.png') }}" alt="Bhavesh"
+              onerror="this.style.display='none'; this.parentNode.innerHTML='👤';">
+          </div>
+          <h3 class="mt-3 font-bold">Bhavesh Sawant</h3>
+          <p class="text-indigo-300 text-sm">Project Lead</p>
+          <p class="text-white/40 text-xs">IEN: 12217028</p>
+          <p class="text-white/70 text-xs mt-2">
+            Led the project end-to-end coordinating the team, reviewing code, identifying logic issues, and testing the system across all components.
+          </p>
+        </a>
+
       </div>
     </div>
-  </nav>
-
-  <!-- Team Section -->
-  <div class="page-content pt-20 sm:pt-28 pb-12 px-2">
-    <section class="flex justify-center mt-4">
-      <div class="glass w-full max-w-5xl text-center">
-
-        <h2 class="text-2xl sm:text-3xl font-bold mb-1">👥 Meet the Team</h2>
-        <p class="text-white/50 text-xs sm:text-sm mb-6">The people behind True Link</p>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-
-          <a href="https://www.linkedin.com/in/shivamanitalakokkula/" target="_blank" class="member-card cursor-pointer">
-            <div class="avatar-wrap">
-              <img src="{{ url_for('static', filename='shivamani.png') }}" alt="Shivamani"
-                onerror="this.style.display='none'; this.parentNode.innerHTML='👤';">
-            </div>
-            <h3 class="mt-3 font-bold">Shivamani Talakokkula</h3>
-            <p class="text-indigo-300 text-sm">Backend Developer</p>
-            <p class="text-white/40 text-xs">IEN: 12317043</p>
-            <p class="text-white/70 text-xs mt-2">
-              Built the Flask backend and core detection logic — handling URL processing, model inference, and API routing.
-            </p>
-          </a>
-
-          <a href="https://www.linkedin.com/in/yash-mandavkar-3a41192a0/" target="_blank" class="member-card cursor-pointer">
-            <div class="avatar-wrap">
-              <img src="{{ url_for('static', filename='yash.png') }}" alt="Yash"
-                onerror="this.style.display='none'; this.parentNode.innerHTML='👤';">
-            </div>
-            <h3 class="mt-3 font-bold">Yash Mandavkar</h3>
-            <p class="text-indigo-300 text-sm">Data Analyst</p>
-            <p class="text-white/40 text-xs">IEN: 12317048</p>
-            <p class="text-white/70 text-xs mt-2">
-              Sourced and prepared the phishing dataset, trained the XGBoost model using Kaggle and Jupyter, and tuned it for accuracy.
-            </p>
-          </a>
-
-          <a href="https://www.linkedin.com/in/yugant-belokar-974923315/" target="_blank" class="member-card cursor-pointer">
-            <div class="avatar-wrap">
-              <img src="{{ url_for('static', filename='yugant.png') }}" alt="Yugant"
-                onerror="this.style.display='none'; this.parentNode.innerHTML='👤';">
-            </div>
-            <h3 class="mt-3 font-bold">Yugant Belokar</h3>
-            <p class="text-indigo-300 text-sm">Frontend Developer</p>
-            <p class="text-white/40 text-xs">IEN: 12347047</p>
-            <p class="text-white/70 text-xs mt-2">
-              Designed and built the entire UI — including the glassmorphism layout, result display, and responsive pages.
-            </p>
-          </a>
-
-          <a href="https://www.linkedin.com/in/bhaveshsawant20/" target="_blank" class="member-card cursor-pointer">
-            <div class="avatar-wrap">
-              <img src="{{ url_for('static', filename='bhavesh.png') }}" alt="Bhavesh"
-                onerror="this.style.display='none'; this.parentNode.innerHTML='👤';">
-            </div>
-            <h3 class="mt-3 font-bold">Bhavesh Sawant</h3>
-            <p class="text-indigo-300 text-sm">Project Lead</p>
-            <p class="text-white/40 text-xs">IEN: 12217028</p>
-            <p class="text-white/70 text-xs mt-2">
-              Led the project end-to-end — coordinating the team, reviewing code, identifying logic issues, and testing the system across all components.
-            </p>
-          </a>
-
-        </div>
-      </div>
-    </section>
-  </div>
-
-  <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      const overlay = document.getElementById('page-overlay');
-      document.querySelectorAll('nav a').forEach(link => {
-        link.addEventListener('click', function (e) {
-          const href = this.getAttribute('href');
-          if (!href || href.startsWith('#')) return;
-          e.preventDefault();
-          overlay.style.opacity = '1';
-          overlay.style.pointerEvents = 'all';
-          setTimeout(() => { window.location.href = href; }, 150);
-        });
-      });
-      ['shivamani.png','yash.png','yugant.png','bhavesh.png','truelink.png','background.png'].forEach(img => {
-        const i = new Image(); i.src = '/static/' + img;
-      });
-    });
-  </script>
+  </section>
+</div>
 
 </body>
 </html>

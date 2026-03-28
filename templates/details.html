@@ -5,8 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script src="https://cdn.tailwindcss.com"></script>
 <title>True Link - Phishing Details</title>
+
 <style>
   html, body { min-height: 100%; margin: 0; padding: 0; }
+
   body {
     background: url('{{ url_for("static", filename="background.png") }}') no-repeat center center fixed;
     background-size: cover;
@@ -14,6 +16,7 @@
     font-family: 'Inter', sans-serif;
     min-height: 100vh;
   }
+
   .glass {
     background: rgba(255, 255, 255, 0.08);
     backdrop-filter: blur(20px);
@@ -25,17 +28,22 @@
     margin: 1rem;
     transition: all 0.3s ease;
   }
+
   .glass:hover {
     background: rgba(255, 255, 255, 0.12);
     box-shadow: 0 12px 40px rgba(0,0,0,0.2);
   }
+
   @media (max-width: 640px) {
     .glass { padding: 1.5rem; margin: 1rem 0.5rem; }
   }
+
   nav a { transition: all 0.2s ease; }
   h3 { color: #eef2ff; }
   p, li { line-height: 1.6; }
   a { color: #a5b4fc; }
+
+  /* 🔥 Improved Section Styling */
   .section-block {
     background: rgba(255,255,255,0.05);
     border-radius: 12px;
@@ -44,171 +52,171 @@
     border-left: 4px solid rgba(99,102,241,0.7);
     transition: all 0.2s ease;
   }
+
   .section-block:hover {
     transform: translateY(-2px);
     background: rgba(255,255,255,0.08);
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .page-content { animation: fadeIn 0.25s ease; }
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(6px); }
-    to   { opacity: 1; transform: translateY(0); }
   }
 </style>
 </head>
 
 <body class="text-white">
 
-  <!-- Page transition overlay -->
-  <div id="page-overlay" style="position:fixed;inset:0;z-index:9999;background:#0f0f1a;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.2s ease;">
-    <div style="text-align:center">
-      <div style="width:40px;height:40px;border-radius:50%;border:3px solid rgba(255,255,255,0.1);border-top-color:#6366f1;animation:spin 0.7s linear infinite;margin:0 auto 12px;"></div>
-      <p style="color:rgba(255,255,255,0.5);font-size:0.8rem;font-family:Inter,sans-serif;">Loading...</p>
+<!-- Navbar -->
+<nav class="fixed top-0 left-0 w-full bg-black/40 backdrop-blur-lg border-b border-white/20 z-50">
+  
+  <div class="flex flex-wrap items-center justify-between px-3 sm:px-6 py-3 sm:py-4">
+
+    <div class="flex items-center">
+      <img src="{{ url_for('static', filename='truelink.png') }}"
+           class="h-10 sm:h-14 md:h-16 lg:h-20 w-auto">
     </div>
-  </div>
 
-  <!-- Navbar -->
-  <nav class="fixed top-0 left-0 w-full bg-black/40 backdrop-blur-lg border-b border-white/20 z-50">
-    <div class="flex flex-wrap items-center justify-between px-3 sm:px-6 py-3 sm:py-4">
-      <div class="flex items-center">
-        <img src="{{ url_for('static', filename='truelink.png') }}" class="h-10 sm:h-14 md:h-16 lg:h-20 w-auto">
-      </div>
-      <div class="w-full sm:w-auto order-3 sm:order-2 text-center sm:absolute sm:left-1/2 sm:-translate-x-1/2 mt-2 sm:mt-0">
-        <span class="text-base sm:text-xl md:text-2xl font-bold text-white">True Link</span>
-      </div>
-      <div class="flex items-center gap-3 sm:gap-6 md:gap-8 text-xs sm:text-sm md:text-base font-semibold order-2 sm:order-3">
-        <a href="{{ url_for('home') }}"    class="{% if request.path == '/' %}text-indigo-400{% else %}text-white{% endif %} hover:text-indigo-300 transition">Home</a>
-        <a href="{{ url_for('team') }}"    class="{% if request.path == '/team' %}text-indigo-400{% else %}text-white{% endif %} hover:text-indigo-300 transition">Team</a>
-        <a href="{{ url_for('details') }}" class="{% if request.path == '/details' %}text-indigo-400{% else %}text-white{% endif %} hover:text-indigo-300 transition">Details</a>
-      </div>
+    <div class="w-full sm:w-auto order-3 sm:order-2 text-center sm:absolute sm:left-1/2 sm:-translate-x-1/2 mt-2 sm:mt-0">
+      <span class="text-base sm:text-xl md:text-2xl font-bold text-white">
+        True Link
+      </span>
     </div>
-  </nav>
 
-  <!-- Content -->
-  <div class="page-content pt-20 sm:pt-28 pb-12">
-    <section class="flex justify-center mt-4 mb-10">
-      <div class="glass w-full max-w-4xl">
+    <div class="flex items-center gap-3 sm:gap-6 md:gap-8 text-xs sm:text-sm md:text-base font-semibold order-2 sm:order-3">
 
-        <h2 class="text-3xl font-bold mb-2 text-center">🛡️ Phishing Website Details</h2>
-        <p class="text-center text-white/50 text-sm mb-4">Learn how phishing works and how to protect yourself</p>
+      <a href="{{ url_for('home') }}"
+         class="{% if request.path == '/' %}text-indigo-400{% else %}text-white{% endif %} hover:text-indigo-300 transition">
+        Home
+      </a>
 
-        <p class="text-sm text-white/80">
-          Phishing websites are malicious platforms designed to steal sensitive information such as login credentials,
-          banking details, and personal data by pretending to be legitimate websites.
-        </p>
+      <a href="{{ url_for('team') }}"
+         class="{% if request.path == '/team' %}text-indigo-400{% else %}text-white{% endif %} hover:text-indigo-300 transition">
+        Team
+      </a>
 
-        <div class="bg-red-500/10 border border-red-400/30 rounded-lg p-3 text-sm mt-4">
-          ⚠️ Most phishing attacks succeed because users fail to verify URLs carefully.
-          Always double-check before entering sensitive information.
-        </div>
+      <a href="{{ url_for('details') }}"
+         class="{% if request.path == '/details' %}text-indigo-400{% else %}text-white{% endif %} hover:text-indigo-300 transition">
+        Details
+      </a>
 
-        <div class="section-block">
-          <h3 class="font-bold text-base mb-2">🤖 How True Link Detects Phishing</h3>
-          <ul class="list-disc ml-5 text-sm space-y-1 text-white/80">
-            <li>Analyzes URL structure (length, subdomains, symbols)</li>
-            <li>Detects suspicious top-level domains (.xyz, .tk, etc.)</li>
-            <li>Uses Machine Learning (XGBoost) for classification</li>
-            <li>Applies NLP (Word2Vec) to understand URL patterns</li>
-            <li>Assigns risk levels based on prediction confidence</li>
-          </ul>
-        </div>
+    </div>
 
-        <div class="section-block">
-          <h3 class="font-bold text-base mb-2">⚠️ Common Signs of Phishing</h3>
-          <ul class="list-disc ml-5 text-sm space-y-1 text-white/80">
-            <li>Suspicious domain names (e.g., <code class="bg-white/10 px-1 rounded">paypaI.com</code> instead of <code class="bg-white/10 px-1 rounded">paypal.com</code>)</li>
-            <li>Use of HTTP instead of HTTPS</li>
-            <li>Too many special characters or random strings in the URL</li>
-            <li>Fake login pages asking for urgent action</li>
-            <li>Spelling mistakes and poor page design</li>
-            <li>Unusual pop-ups or unexpected download prompts</li>
-          </ul>
-        </div>
-
-        <div class="section-block">
-          <h3 class="font-bold text-base mb-2">🎣 Types of Phishing</h3>
-          <ul class="list-disc ml-5 text-sm space-y-1 text-white/80">
-            <li><strong>Email Phishing:</strong> Fake emails pretending to be from trusted organizations.</li>
-            <li><strong>Website Phishing:</strong> Cloned websites mimicking real sites to steal credentials.</li>
-            <li><strong>Smishing:</strong> Phishing via SMS or text messages.</li>
-            <li><strong>Vishing:</strong> Voice phishing using phone calls.</li>
-            <li><strong>Spear Phishing:</strong> Targeted phishing towards specific individuals or companies.</li>
-          </ul>
-        </div>
-
-        <div class="section-block">
-          <h3 class="font-bold text-base mb-2">💥 Consequences of Phishing</h3>
-          <ul class="list-disc ml-5 text-sm space-y-1 text-white/80">
-            <li>Unauthorized access to bank accounts or financial loss.</li>
-            <li>Identity theft and misuse of personal data.</li>
-            <li>Compromise of business or corporate accounts.</li>
-            <li>Installation of malware or ransomware on devices.</li>
-          </ul>
-        </div>
-
-        <div class="section-block">
-          <h3 class="font-bold text-base mb-2">🔎 How to Verify a Website</h3>
-          <ul class="list-disc ml-5 text-sm space-y-1 text-white/80">
-            <li>Check the URL carefully for spelling errors or extra characters.</li>
-            <li>Look for HTTPS and a valid security certificate.</li>
-            <li>Search the domain on Google or check reputation services like <a href="https://www.virustotal.com" target="_blank" class="underline">VirusTotal</a>.</li>
-            <li>Avoid clicking suspicious email links or pop-ups.</li>
-            <li>Use password managers — they automatically detect phishing domains.</li>
-          </ul>
-        </div>
-
-        <div class="section-block">
-          <h3 class="font-bold text-base mb-2">🛡️ Prevention Tips</h3>
-          <ul class="list-disc ml-5 text-sm space-y-1 text-white/80">
-            <li>Enable two-factor authentication (2FA) wherever possible.</li>
-            <li>Keep software, browsers, and OS updated regularly.</li>
-            <li>Educate yourself and team members about phishing tactics.</li>
-            <li>Use anti-phishing browser extensions and security software.</li>
-            <li>Never reuse passwords across multiple websites.</li>
-          </ul>
-        </div>
-
-        <div class="section-block">
-          <h3 class="font-bold text-base mb-2">📰 Real-World Examples</h3>
-          <ul class="list-disc ml-5 text-sm space-y-1 text-white/80">
-            <li>PayPal phishing email asking to verify account with a fake link.</li>
-            <li>Netflix phishing site requesting login to continue subscription.</li>
-            <li>Banking phishing SMS pretending to be from official bank numbers.</li>
-          </ul>
-        </div>
-
-        <div class="section-block">
-          <h3 class="font-bold text-base mb-2">📚 Research References</h3>
-          <ul class="list-disc ml-5 text-sm space-y-1">
-            <li><a href="https://www.antiphishing.org/resources/" target="_blank" class="underline hover:text-white">APWG Phishing Reports</a></li>
-            <li><a href="https://ieeexplore.ieee.org/document/10630203" target="_blank" class="underline hover:text-white">IEEE Research Paper on Phishing Detection</a></li>
-            <li><a href="https://ieeexplore.ieee.org/document/10058201" target="_blank" class="underline hover:text-white">Machine Learning for Phishing Detection</a></li>
-            <li><a href="https://www.cisa.gov/uscert/ncas/tips/ST04-014" target="_blank" class="underline hover:text-white">CISA Phishing Awareness</a></li>
-          </ul>
-        </div>
-
-      </div>
-    </section>
   </div>
+</nav>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      const overlay = document.getElementById('page-overlay');
-      document.querySelectorAll('nav a').forEach(link => {
-        link.addEventListener('click', function (e) {
-          const href = this.getAttribute('href');
-          if (!href || href.startsWith('#')) return;
-          e.preventDefault();
-          overlay.style.opacity = '1';
-          overlay.style.pointerEvents = 'all';
-          setTimeout(() => { window.location.href = href; }, 150);
-        });
-      });
-      ['shivamani.png','yash.png','yugant.png','bhavesh.png','truelink.png','background.png'].forEach(img => {
-        const i = new Image(); i.src = '/static/' + img;
-      });
-    });
-  </script>
+<!-- Content -->
+<div class="pt-28 pb-12">
+  <section class="flex justify-center mt-4 mb-10">
+    <div class="glass w-full max-w-4xl">
+
+      <h2 class="text-3xl font-bold mb-2 text-center">🛡️ Phishing Website Details</h2>
+      <p class="text-center text-white/50 text-sm mb-4">
+        Learn how phishing works and how to protect yourself
+      </p>
+
+      <p class="text-sm text-white/80">
+        Phishing websites are malicious platforms designed to steal sensitive information such as login credentials,
+        banking details, and personal data by pretending to be legitimate websites.
+      </p>
+
+      <!-- 🔥 Warning -->
+      <div class="bg-red-500/10 border border-red-400/30 rounded-lg p-3 text-sm mt-4">
+        ⚠️ Most phishing attacks succeed because users fail to verify URLs carefully.
+        Always double-check before entering sensitive information.
+      </div>
+
+      <!-- 🔥 Your System Explanation -->
+      <div class="section-block">
+        <h3 class="font-bold text-base mb-2">🤖 How True Link Detects Phishing</h3>
+        <ul class="list-disc ml-5 text-sm space-y-1 text-white/80">
+          <li>Analyzes URL structure (length, subdomains, symbols)</li>
+          <li>Detects suspicious top-level domains (.xyz, .tk, etc.)</li>
+          <li>Uses Machine Learning (XGBoost) for classification</li>
+          <li>Applies NLP (Word2Vec) to understand URL patterns</li>
+          <li>Assigns risk levels based on prediction confidence</li>
+        </ul>
+      </div>
+
+      <!-- Common Signs -->
+      <div class="section-block">
+        <h3 class="font-bold text-base mb-2">⚠️ Common Signs of Phishing</h3>
+        <ul class="list-disc ml-5 text-sm space-y-1 text-white/80">
+          <li>Suspicious domain names (e.g., <code class="bg-white/10 px-1 rounded">paypaI.com</code> instead of <code class="bg-white/10 px-1 rounded">paypal.com</code>)</li>
+          <li>Use of HTTP instead of HTTPS</li>
+          <li>Too many special characters or random strings in the URL</li>
+          <li>Fake login pages asking for urgent action</li>
+          <li>Spelling mistakes and poor page design</li>
+          <li>Unusual pop-ups or unexpected download prompts</li>
+        </ul>
+      </div>
+
+      <!-- Types -->
+      <div class="section-block">
+        <h3 class="font-bold text-base mb-2">🎣 Types of Phishing</h3>
+        <ul class="list-disc ml-5 text-sm space-y-1 text-white/80">
+          <li><strong>Email Phishing:</strong> Fake emails pretending to be from trusted organizations.</li>
+          <li><strong>Website Phishing:</strong> Cloned websites mimicking real sites to steal credentials.</li>
+          <li><strong>Smishing:</strong> Phishing via SMS or text messages.</li>
+          <li><strong>Vishing:</strong> Voice phishing using phone calls.</li>
+          <li><strong>Spear Phishing:</strong> Targeted phishing towards specific individuals or companies.</li>
+        </ul>
+      </div>
+
+      <!-- Consequences -->
+      <div class="section-block">
+        <h3 class="font-bold text-base mb-2">💥 Consequences of Phishing</h3>
+        <ul class="list-disc ml-5 text-sm space-y-1 text-white/80">
+          <li>Unauthorized access to bank accounts or financial loss.</li>
+          <li>Identity theft and misuse of personal data.</li>
+          <li>Compromise of business or corporate accounts.</li>
+          <li>Installation of malware or ransomware on devices.</li>
+        </ul>
+      </div>
+
+      <!-- How to Verify -->
+      <div class="section-block">
+        <h3 class="font-bold text-base mb-2">🔎 How to Verify a Website</h3>
+        <ul class="list-disc ml-5 text-sm space-y-1 text-white/80">
+          <li>Check the URL carefully for spelling errors or extra characters.</li>
+          <li>Look for HTTPS and a valid security certificate.</li>
+          <li>Search the domain on Google or check reputation services like <a href="https://www.virustotal.com" target="_blank" class="underline">VirusTotal</a>.</li>
+          <li>Avoid clicking suspicious email links or pop-ups.</li>
+          <li>Use password managers — they automatically detect phishing domains.</li>
+        </ul>
+      </div>
+
+      <!-- Prevention -->
+      <div class="section-block">
+        <h3 class="font-bold text-base mb-2">🛡️ Prevention Tips</h3>
+        <ul class="list-disc ml-5 text-sm space-y-1 text-white/80">
+          <li>Enable two-factor authentication (2FA) wherever possible.</li>
+          <li>Keep software, browsers, and OS updated regularly.</li>
+          <li>Educate yourself and team members about phishing tactics.</li>
+          <li>Use anti-phishing browser extensions and security software.</li>
+          <li>Never reuse passwords across multiple websites.</li>
+        </ul>
+      </div>
+
+      <!-- Real World Examples -->
+      <div class="section-block">
+        <h3 class="font-bold text-base mb-2">📰 Real-World Examples</h3>
+        <ul class="list-disc ml-5 text-sm space-y-1 text-white/80">
+          <li>PayPal phishing email asking to verify account with a fake link.</li>
+          <li>Netflix phishing site requesting login to continue subscription.</li>
+          <li>Banking phishing SMS pretending to be from official bank numbers.</li>
+        </ul>
+      </div>
+
+      <!-- References -->
+      <div class="section-block">
+        <h3 class="font-bold text-base mb-2">📚 Research References</h3>
+        <ul class="list-disc ml-5 text-sm space-y-1">
+          <li><a href="https://www.antiphishing.org/resources/" target="_blank" class="underline hover:text-white">APWG Phishing Reports</a></li>
+          <li><a href="https://ieeexplore.ieee.org/document/10630203" target="_blank" class="underline hover:text-white">IEEE Research Paper on Phishing Detection</a></li>
+          <li><a href="https://ieeexplore.ieee.org/document/10058201" target="_blank" class="underline hover:text-white">Machine Learning for Phishing Detection</a></li>
+          <li><a href="https://www.cisa.gov/uscert/ncas/tips/ST04-014" target="_blank" class="underline hover:text-white">CISA Phishing Awareness</a></li>
+        </ul>
+      </div>
+
+    </div>
+  </section>
+</div>
 
 </body>
 </html>
