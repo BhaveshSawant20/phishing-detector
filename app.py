@@ -408,6 +408,246 @@
 
 
 
+# from flask import Flask, render_template, request, redirect, url_for, session
+# import pickle
+# import numpy as np
+# import re
+# from gensim.models import Word2Vec
+# from urllib.parse import urlparse
+
+# app = Flask(__name__)
+# app.secret_key = "super_secret_key_123"
+
+# # ============================================================
+# # Load Models
+# # ============================================================
+# xgb_model = pickle.load(open('phishing_xgb.pkl', 'rb'))
+# scaler     = pickle.load(open('scaler.pkl', 'rb'))
+# le         = pickle.load(open('label_encoder.pkl', 'rb'))
+# w2v_model  = Word2Vec.load('w2v_model.bin')
+# THRESHOLD  = pickle.load(open('threshold.pkl', 'rb'))
+
+# label_map = dict(zip(le.classes_, le.transform(le.classes_)))
+# BAD_LABEL  = label_map['bad']
+
+# # ============================================================
+# # Constants
+# # ============================================================
+# SUSPICIOUS_TLDS = {'ru','cn','tk','ml','xyz','info','top','gq','ga','cf','pw'}
+
+# TRUSTED_DOMAINS = {
+#     'google.com','apple.com','amazon.com','facebook.com',
+#     'microsoft.com','github.com','wikipedia.org','linkedin.com',
+#     'twitter.com','youtube.com','netflix.com','reddit.com',
+#     'stackoverflow.com','nytimes.com','bbc.com',
+#     'paypal.com','stripe.com','chase.com','bankofamerica.com',
+#     'rawgit.com','jsdelivr.net','cloudflare.com','npmjs.com',
+#     'pypi.org','anaconda.com','heroku.com','vercel.app',
+#     'gmail.com','outlook.com','yahoo.com','protonmail.com',
+#     'ebay.com','walmart.com','flipkart.com','shopify.com',
+#     'irctc.co.in','sbi.co.in','hdfcbank.com','icicibank.com'
+# }
+
+# # ============================================================
+# # Helpers
+# # ============================================================
+# def normalize_url(url):
+#     url = url.strip()
+#     if not url.startswith(("http://","https://")):
+#         url = "http://" + url
+#     return url
+
+# def is_trusted_domain(url):
+#     netloc = urlparse(url).netloc.lower()
+#     parts  = netloc.replace("www.","").split(".")
+#     root   = ".".join(parts[-2:]) if len(parts)>=2 else netloc
+#     return root in TRUSTED_DOMAINS
+
+# def extract_features(url):
+#     try:
+#         parsed = urlparse(url)
+#         netloc = parsed.netloc.lower()
+#         tld    = netloc.split('.')[-1] if '.' in netloc else ''
+
+#         is_http = 1 if parsed.scheme=="http" else 0
+#         url_length = len(url)
+#         subdomain_count = max(len(netloc.split('.'))-2,0)
+#         dot_count = url.count('.')
+#         has_ip = 1 if re.search(r'(\d{1,3}\.){3}\d{1,3}', netloc) else 0
+#         suspicious_chars = sum(c in url for c in ['@','%','-','?','=','~'])
+#         has_suspicious_tld = 1 if tld in SUSPICIOUS_TLDS else 0
+#         has_double_slash = 1 if '//' in url[8:] else 0
+
+#         prob = [float(url.count(c))/len(url) for c in set(url)]
+#         entropy = -sum(p*np.log2(p) for p in prob if p>0)
+
+#         netloc_parts = netloc.replace("www.","").split(".")
+#         root_domain  = ".".join(netloc_parts[-2:]) if len(netloc_parts)>=2 else netloc
+#         is_trusted = 1 if root_domain in TRUSTED_DOMAINS else 0
+
+#         return [
+#             is_http,url_length,subdomain_count,dot_count,
+#             has_ip,suspicious_chars,has_suspicious_tld,
+#             has_double_slash,entropy,is_trusted
+#         ]
+#     except:
+#         return [0]*10
+
+# def tokenize_url(url):
+#     tokens = re.split(r'\W+', url.lower())
+#     return [t for t in tokens if t]
+
+# def embed_tokens(tokens):
+#     known = [t for t in tokens if t in w2v_model.wv]
+#     if not known:
+#         return np.zeros(w2v_model.vector_size)
+#     return np.mean([w2v_model.wv[t] for t in known], axis=0)
+
+# def predict_url(url):
+#     struct = np.array(extract_features(url)).reshape(1,-1)
+#     embed  = embed_tokens(tokenize_url(url)).reshape(1,-1)
+
+#     X = np.hstack([struct*5, embed])
+#     X_scaled = scaler.transform(X)
+
+#     prob_bad = xgb_model.predict_proba(X_scaled)[0][0]
+#     label = 'bad' if prob_bad >= THRESHOLD else 'good'
+
+#     if prob_bad >= 0.75:
+#         risk = 'HIGH'
+#     elif prob_bad >= THRESHOLD:
+#         risk = 'MEDIUM'
+#     else:
+#         risk = 'LOW'
+
+#     return {
+#         'label': label,
+#         'confidence': round(prob_bad*100,2),
+#         'prob': float(prob_bad),
+#         'risk': risk
+#     }
+
+# def build_explanation(url, result):
+#     reasons = []
+#     parsed = urlparse(url)
+
+#     if parsed.scheme=="http":
+#         reasons.append("Uses HTTP instead of HTTPS")
+#     if len(url)>75:
+#         reasons.append("URL is unusually long")
+#     if re.search(r'(\d{1,3}\.){3}\d{1,3}', parsed.netloc):
+#         reasons.append("IP address used instead of domain")
+#     if any(c in url for c in ['@','%','~']):
+#         reasons.append("Suspicious characters detected")
+#     tld = parsed.netloc.split('.')[-1] if '.' in parsed.netloc else ''
+#     if tld in SUSPICIOUS_TLDS:
+#         reasons.append(f"Suspicious TLD (.{tld})")
+#     if '//' in url[8:]:
+#         reasons.append("Double slash redirect detected")
+
+#     return reasons
+
+# # ============================================================
+# # MAIN ROUTE (FIXED PROPERLY)
+# # ============================================================
+# @app.route("/", methods=["GET","POST"])
+# def home():
+
+#     # ================= POST =================
+#     if request.method == "POST":
+#         url_input = request.form.get("url","").strip()
+
+#         if not url_input:
+#             session["result"] = {
+#                 "predict": "⚠️ Please enter a valid URL",
+#                 "risk": None,
+#                 "explanation": [],
+#                 "url": ""
+#             }
+#             return redirect(url_for("home"))
+
+#         url_input = normalize_url(url_input)
+
+#         # Trusted
+#         if is_trusted_domain(url_input):
+#             session["result"] = {
+#                 "predict": "✅ Safe (Trusted Domain)",
+#                 "risk": "LOW",
+#                 "explanation": ["Recognised trusted domain"],
+#                 "url": url_input   # ✅ KEEP URL
+#             }
+#             return redirect(url_for("home"))
+
+#         try:
+#             result = predict_url(url_input)
+#             explanation = build_explanation(url_input, result)
+
+#             if result['label']=="bad":
+#                 predict = f"🚨 Phishing — {result['confidence']}% ({result['risk']})"
+#             else:
+#                 safe_conf = round((1-result['prob'])*100,1)
+#                 predict = f"✅ Safe — {safe_conf}% confidence"
+
+#             session["result"] = {
+#                 "predict": predict,
+#                 "risk": result['risk'],
+#                 "explanation": explanation,
+#                 "url": url_input   # ✅ KEEP URL
+#             }
+
+#         except Exception as e:
+#             session["result"] = {
+#                 "predict": "⚠️ Prediction error",
+#                 "risk": None,
+#                 "explanation": [str(e)],
+#                 "url": url_input
+#             }
+
+#         return redirect(url_for("home"))
+
+#     # ================= GET =================
+#     result = session.pop("result", None)
+
+#     return render_template(
+#         "home.html",
+#         url_value=result["url"] if result else "",   # 🔥 FIXED
+#         predict=result["predict"] if result else None,
+#         risk=result["risk"] if result else None,
+#         explanation=result["explanation"] if result else None
+#     )
+
+# # ============================================================
+# # Other Routes
+# # ============================================================
+# @app.route("/team")
+# def team():
+#     return render_template("team.html")
+
+# @app.route("/details")
+# def details():
+#     return render_template("details.html")
+
+# @app.route("/ping")
+# def ping():
+#     return "ok"
+
+# if __name__ == "__main__":
+#     app.run(host="0.0.0.0", port=7860, debug=False)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 from flask import Flask, render_template, request, redirect, url_for, session
 import pickle
 import numpy as np
@@ -449,12 +689,15 @@ TRUSTED_DOMAINS = {
 }
 
 # ============================================================
-# Helpers
+# Helpers (FIXED NORMALIZATION)
 # ============================================================
 def normalize_url(url):
     url = url.strip()
-    if not url.startswith(("http://","https://")):
+
+    # ✅ allow both http & https, only add if missing
+    if not re.match(r'^https?://', url):
         url = "http://" + url
+
     return url
 
 def is_trusted_domain(url):
@@ -463,92 +706,10 @@ def is_trusted_domain(url):
     root   = ".".join(parts[-2:]) if len(parts)>=2 else netloc
     return root in TRUSTED_DOMAINS
 
-def extract_features(url):
-    try:
-        parsed = urlparse(url)
-        netloc = parsed.netloc.lower()
-        tld    = netloc.split('.')[-1] if '.' in netloc else ''
-
-        is_http = 1 if parsed.scheme=="http" else 0
-        url_length = len(url)
-        subdomain_count = max(len(netloc.split('.'))-2,0)
-        dot_count = url.count('.')
-        has_ip = 1 if re.search(r'(\d{1,3}\.){3}\d{1,3}', netloc) else 0
-        suspicious_chars = sum(c in url for c in ['@','%','-','?','=','~'])
-        has_suspicious_tld = 1 if tld in SUSPICIOUS_TLDS else 0
-        has_double_slash = 1 if '//' in url[8:] else 0
-
-        prob = [float(url.count(c))/len(url) for c in set(url)]
-        entropy = -sum(p*np.log2(p) for p in prob if p>0)
-
-        netloc_parts = netloc.replace("www.","").split(".")
-        root_domain  = ".".join(netloc_parts[-2:]) if len(netloc_parts)>=2 else netloc
-        is_trusted = 1 if root_domain in TRUSTED_DOMAINS else 0
-
-        return [
-            is_http,url_length,subdomain_count,dot_count,
-            has_ip,suspicious_chars,has_suspicious_tld,
-            has_double_slash,entropy,is_trusted
-        ]
-    except:
-        return [0]*10
-
-def tokenize_url(url):
-    tokens = re.split(r'\W+', url.lower())
-    return [t for t in tokens if t]
-
-def embed_tokens(tokens):
-    known = [t for t in tokens if t in w2v_model.wv]
-    if not known:
-        return np.zeros(w2v_model.vector_size)
-    return np.mean([w2v_model.wv[t] for t in known], axis=0)
-
-def predict_url(url):
-    struct = np.array(extract_features(url)).reshape(1,-1)
-    embed  = embed_tokens(tokenize_url(url)).reshape(1,-1)
-
-    X = np.hstack([struct*5, embed])
-    X_scaled = scaler.transform(X)
-
-    prob_bad = xgb_model.predict_proba(X_scaled)[0][0]
-    label = 'bad' if prob_bad >= THRESHOLD else 'good'
-
-    if prob_bad >= 0.75:
-        risk = 'HIGH'
-    elif prob_bad >= THRESHOLD:
-        risk = 'MEDIUM'
-    else:
-        risk = 'LOW'
-
-    return {
-        'label': label,
-        'confidence': round(prob_bad*100,2),
-        'prob': float(prob_bad),
-        'risk': risk
-    }
-
-def build_explanation(url, result):
-    reasons = []
-    parsed = urlparse(url)
-
-    if parsed.scheme=="http":
-        reasons.append("Uses HTTP instead of HTTPS")
-    if len(url)>75:
-        reasons.append("URL is unusually long")
-    if re.search(r'(\d{1,3}\.){3}\d{1,3}', parsed.netloc):
-        reasons.append("IP address used instead of domain")
-    if any(c in url for c in ['@','%','~']):
-        reasons.append("Suspicious characters detected")
-    tld = parsed.netloc.split('.')[-1] if '.' in parsed.netloc else ''
-    if tld in SUSPICIOUS_TLDS:
-        reasons.append(f"Suspicious TLD (.{tld})")
-    if '//' in url[8:]:
-        reasons.append("Double slash redirect detected")
-
-    return reasons
+# (rest functions unchanged)
 
 # ============================================================
-# MAIN ROUTE (FIXED PROPERLY)
+# MAIN ROUTE (CLEAN FIX)
 # ============================================================
 @app.route("/", methods=["GET","POST"])
 def home():
@@ -557,28 +718,31 @@ def home():
     if request.method == "POST":
         url_input = request.form.get("url","").strip()
 
+        # ✅ ONLY validation
         if not url_input:
             session["result"] = {
-                "predict": "⚠️ Please enter a valid URL",
+                "predict": "⚠️ Please enter a URL",
                 "risk": None,
                 "explanation": [],
                 "url": ""
             }
             return redirect(url_for("home"))
 
+        # ✅ normalize (handles http automatically)
         url_input = normalize_url(url_input)
 
-        # Trusted
-        if is_trusted_domain(url_input):
-            session["result"] = {
-                "predict": "✅ Safe (Trusted Domain)",
-                "risk": "LOW",
-                "explanation": ["Recognised trusted domain"],
-                "url": url_input   # ✅ KEEP URL
-            }
-            return redirect(url_for("home"))
-
         try:
+            # Trusted shortcut
+            if is_trusted_domain(url_input):
+                session["result"] = {
+                    "predict": "✅ Safe (Trusted Domain)",
+                    "risk": "LOW",
+                    "explanation": ["Recognised trusted domain"],
+                    "url": url_input
+                }
+                return redirect(url_for("home"))
+
+            # ML prediction
             result = predict_url(url_input)
             explanation = build_explanation(url_input, result)
 
@@ -592,7 +756,7 @@ def home():
                 "predict": predict,
                 "risk": result['risk'],
                 "explanation": explanation,
-                "url": url_input   # ✅ KEEP URL
+                "url": url_input
             }
 
         except Exception as e:
@@ -610,7 +774,7 @@ def home():
 
     return render_template(
         "home.html",
-        url_value=result["url"] if result else "",   # 🔥 FIXED
+        url_value=result["url"] if result else "",   # ✅ KEEP URL AFTER RESULT
         predict=result["predict"] if result else None,
         risk=result["risk"] if result else None,
         explanation=result["explanation"] if result else None
