@@ -588,10 +588,25 @@ def home():
 
         # Trusted domain shortcut
         if is_trusted_domain(url_input):
+            parsed_t = urlparse(url_input)
+            tld_t    = parsed_t.netloc.split('.')[-1] if '.' in parsed_t.netloc else ''
+            trust_reasons = ["Recognised as a globally trusted domain"]
+
+            if url_input.startswith("https://"):
+                trust_reasons.append("Uses HTTPS — connection is encrypted and secure")
+            if not re.search(r'(\d{1,3}\.){3}\d{1,3}', parsed_t.netloc):
+                trust_reasons.append("Uses a proper domain name, not a raw IP address")
+            if tld_t in ['com', 'org', 'net', 'gov', 'edu', 'in']:
+                trust_reasons.append(f"Legitimate top-level domain (.{tld_t})")
+            if url_input.count('.') <= 3:
+                trust_reasons.append("Clean URL structure with no excessive subdomains")
+            if not any(c in url_input for c in ['@', '%', '~']):
+                trust_reasons.append("No suspicious characters found in the URL")
+
             session["result"] = {
                 "predict":     "✅ Safe (Trusted Domain)",
                 "risk":        "LOW",
-                "explanation": ["Recognised as a globally trusted domain"],
+                "explanation": trust_reasons,
                 "url":         url_input
             }
             return redirect(url_for("home"))

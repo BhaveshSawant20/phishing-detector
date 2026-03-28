@@ -181,11 +181,11 @@
       urlInput.addEventListener('input', function () {
         emptyWarning.classList.add('hidden');
 
+        // Only hide result + show tips when input is fully cleared
+        // Tips stay visible while typing — they disappear only when result arrives
         if (this.value.trim() === '') {
           if (resultSection) resultSection.style.display = 'none';
           if (tipsSection)   tipsSection.style.display   = 'block';
-        } else {
-          if (tipsSection) tipsSection.style.display = 'none';
         }
       });
     </script>
