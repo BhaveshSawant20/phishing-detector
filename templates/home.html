@@ -233,23 +233,15 @@
       </div>
     </section>
 
-    <!-- JS (SAFE VERSION) -->
-    <script>
-      const urlInput = document.querySelector('input[name="url"]');
+<script>
+  const form = document.querySelector('form');
+  const tipsSection = document.getElementById("tips-section");
 
-      if (urlInput) {
-        const resultSection = document.getElementById("result-section");
-        const tipsSection = document.getElementById("tips-section");
-
-        urlInput.addEventListener("input", function () {
-          if (this.value.trim() === "") {
-            if (resultSection) resultSection.style.display = "none";
-            if (tipsSection) tipsSection.style.display = "block";
-          } else {
-            if (tipsSection) tipsSection.style.display = "none";
-          }
-        });
-      }
-    </script>
+  if (form) {
+    form.addEventListener("submit", function () {
+      if (tipsSection) tipsSection.style.display = "none";
+    });
+  }
+</script>
   </body>
 </html>
