@@ -416,7 +416,7 @@ from gensim.models import Word2Vec
 from urllib.parse import urlparse
 
 app = Flask(__name__)
-app.secret_key = "super_secret_key_123"  # REQUIRED for session
+app.secret_key = "super_secret_key_123"
 
 # ============================================================
 # Load Models
@@ -449,7 +449,7 @@ TRUSTED_DOMAINS = {
 }
 
 # ============================================================
-# Helpers (UNCHANGED)
+# Helpers
 # ============================================================
 def normalize_url(url):
     url = url.strip()
@@ -548,7 +548,7 @@ def build_explanation(url, result):
     return reasons
 
 # ============================================================
-# MAIN ROUTE (FIXED)
+# MAIN ROUTE (FIXED PROPERLY)
 # ============================================================
 @app.route("/", methods=["GET","POST"])
 def home():
@@ -561,18 +561,20 @@ def home():
             session["result"] = {
                 "predict": "⚠️ Please enter a valid URL",
                 "risk": None,
-                "explanation": []
+                "explanation": [],
+                "url": ""
             }
             return redirect(url_for("home"))
 
         url_input = normalize_url(url_input)
 
-        # Trusted shortcut
+        # Trusted
         if is_trusted_domain(url_input):
             session["result"] = {
                 "predict": "✅ Safe (Trusted Domain)",
                 "risk": "LOW",
-                "explanation": ["Recognised trusted domain"]
+                "explanation": ["Recognised trusted domain"],
+                "url": url_input   # ✅ KEEP URL
             }
             return redirect(url_for("home"))
 
@@ -589,14 +591,16 @@ def home():
             session["result"] = {
                 "predict": predict,
                 "risk": result['risk'],
-                "explanation": explanation
+                "explanation": explanation,
+                "url": url_input   # ✅ KEEP URL
             }
 
         except Exception as e:
             session["result"] = {
                 "predict": "⚠️ Prediction error",
                 "risk": None,
-                "explanation": [str(e)]
+                "explanation": [str(e)],
+                "url": url_input
             }
 
         return redirect(url_for("home"))
@@ -606,7 +610,7 @@ def home():
 
     return render_template(
         "home.html",
-        url_value="",  # 🔥 always clear input
+        url_value=result["url"] if result else "",   # 🔥 FIXED
         predict=result["predict"] if result else None,
         risk=result["risk"] if result else None,
         explanation=result["explanation"] if result else None
