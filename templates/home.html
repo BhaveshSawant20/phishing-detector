@@ -7,22 +7,14 @@
     <title>True Link - Home</title>
 
     <style>
-      html,
+      html, body { min-height: 100%; margin: 0; padding: 0; }
       body {
-        min-height: 100%;
-        margin: 0;
-        padding: 0;
-      }
-
-      body {
-        background: url('{{ url_for("static", filename="background.png") }}')
-          no-repeat center center fixed;
+        background: url('{{ url_for("static", filename="background.png") }}') no-repeat center center fixed;
         background-size: cover;
         background-color: #0f0f1a;
         font-family: "Inter", sans-serif;
         min-height: 100vh;
       }
-
       .glass {
         background: rgba(255, 255, 255, 0.08);
         backdrop-filter: blur(20px);
@@ -34,126 +26,71 @@
         margin: 1rem;
         transition: all 0.3s ease;
       }
-
       .glass:hover {
         background: rgba(255, 255, 255, 0.12);
         box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
       }
-
       @media (max-width: 640px) {
-        .glass {
-          padding: 1.25rem;
-          margin: 0.75rem 0.5rem;
-        }
+        .glass { padding: 1.25rem; margin: 0.75rem 0.5rem; }
       }
-
-      nav a {
-        transition: all 0.2s ease;
-      }
-
-      button {
-        cursor: pointer;
-        font-weight: 600;
-        border-radius: 12px;
-        transition: all 0.2s ease;
-      }
+      nav a { transition: all 0.2s ease; }
+      button { cursor: pointer; font-weight: 600; border-radius: 12px; transition: all 0.2s ease; }
 
       @keyframes pulse-red {
-        0%,
-        100% {
-          box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
-        }
-        50% {
-          box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
-        }
+        0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+        50%       { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
       }
+      .pulse-red { animation: pulse-red 1.5s infinite; }
 
-      .pulse-red {
-        animation: pulse-red 1.5s infinite;
+      /* Empty input warning shake */
+      @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        20%       { transform: translateX(-6px); }
+        40%       { transform: translateX(6px); }
+        60%       { transform: translateX(-4px); }
+        80%       { transform: translateX(4px); }
       }
+      .shake { animation: shake 0.4s ease; }
     </style>
   </head>
 
   <body class="text-white">
+
     <!-- Navbar -->
-    <nav
-      class="fixed top-0 left-0 w-full bg-black/40 backdrop-blur-lg border-b border-white/20 z-50"
-    >
-      <div
-        class="flex flex-wrap items-center justify-between px-3 sm:px-6 py-3 sm:py-4"
-      >
-        <!-- Logo -->
+    <nav class="fixed top-0 left-0 w-full bg-black/40 backdrop-blur-lg border-b border-white/20 z-50">
+      <div class="flex flex-wrap items-center justify-between px-3 sm:px-6 py-3 sm:py-4">
         <div class="flex items-center">
-          <img
-            src="{{ url_for('static', filename='truelink.png') }}"
-            class="h-10 sm:h-14 md:h-16 lg:h-20 w-auto"
-          />
+          <img src="{{ url_for('static', filename='truelink.png') }}" class="h-10 sm:h-14 md:h-16 lg:h-20 w-auto" />
         </div>
-
-        <!-- Title -->
-        <div
-          class="w-full sm:w-auto order-3 sm:order-2 text-center sm:absolute sm:left-1/2 sm:-translate-x-1/2 mt-2 sm:mt-0"
-        >
-          <span class="text-base sm:text-xl md:text-2xl font-bold">
-            True Link
-          </span>
+        <div class="w-full sm:w-auto order-3 sm:order-2 text-center sm:absolute sm:left-1/2 sm:-translate-x-1/2 mt-2 sm:mt-0">
+          <span class="text-base sm:text-xl md:text-2xl font-bold">True Link</span>
         </div>
-
-        <!-- Menu -->
-        <div
-          class="flex items-center gap-3 sm:gap-6 md:gap-8 text-xs sm:text-sm md:text-base font-semibold order-2 sm:order-3"
-        >
-          <a
-            href="{{ url_for('home') }}"
-            class="{% if request.path == '/' %}text-indigo-400{% else %}text-white{% endif %} hover:text-indigo-300"
-          >
-            Home
-          </a>
-
-          <a
-            href="{{ url_for('team') }}"
-            class="{% if request.path == '/team' %}text-indigo-400{% else %}text-white{% endif %} hover:text-indigo-300"
-          >
-            Team
-          </a>
-
-          <a
-            href="{{ url_for('details') }}"
-            class="{% if request.path == '/details' %}text-indigo-400{% else %}text-white{% endif %} hover:text-indigo-300"
-          >
-            Details
-          </a>
+        <div class="flex items-center gap-3 sm:gap-6 md:gap-8 text-xs sm:text-sm md:text-base font-semibold order-2 sm:order-3">
+          <a href="{{ url_for('home') }}"    class="{% if request.path == '/' %}text-indigo-400{% else %}text-white{% endif %} hover:text-indigo-300">Home</a>
+          <a href="{{ url_for('team') }}"    class="{% if request.path == '/team' %}text-indigo-400{% else %}text-white{% endif %} hover:text-indigo-300">Team</a>
+          <a href="{{ url_for('details') }}" class="{% if request.path == '/details' %}text-indigo-400{% else %}text-white{% endif %} hover:text-indigo-300">Details</a>
         </div>
       </div>
     </nav>
 
     <!-- Main -->
-    <section
-      class="flex justify-center items-center px-2"
-      style="min-height: 100vh; padding-top: 70px"
-    >
+    <section class="flex justify-center items-center px-2" style="min-height: 100vh; padding-top: 70px;">
       <div class="glass w-full max-w-2xl text-center">
-        <h1 class="text-xl sm:text-2xl font-bold mb-2">
-          🔍 URL Phishing Detector
-        </h1>
-        <p class="text-xs sm:text-sm text-white/60 mb-5">
-          Enter any URL to check if it's safe or a phishing site
-        </p>
 
-        <!-- FORM (FIXED) -->
-        <form method="POST" action="{{ url_for('home') }}">
+        <h1 class="text-xl sm:text-2xl font-bold mb-2">🔍 URL Phishing Detector</h1>
+        <p class="text-xs sm:text-sm text-white/60 mb-5">Enter any URL to check if it's safe or a phishing site</p>
+
+        <!-- Form — no pattern/required, handled by JS + app.py -->
+        <form method="POST" action="{{ url_for('home') }}" id="url-form">
           <div class="flex flex-col sm:flex-row gap-3">
-            <!-- INPUT (VALIDATED) -->
             <input
+              id="url-input"
               name="url"
               value="{{ url_value }}"
               placeholder="https://example.com"
               autocomplete="off"
-              required
-              pattern="https?://.+"
               class="flex-1 p-3 rounded-xl text-black outline-none text-sm w-full"
             />
-
             <button
               type="submit"
               class="bg-indigo-600 px-6 py-3 rounded-xl hover:bg-indigo-700 text-white text-sm w-full sm:w-auto"
@@ -161,95 +98,96 @@
               CHECK URL
             </button>
           </div>
+
+          <!-- Empty input warning (hidden by default) -->
+          <div id="empty-warning" class="hidden mt-3 flex items-center justify-center gap-2 bg-yellow-500/20 border border-yellow-400/40 rounded-xl px-4 py-2 text-yellow-300 text-sm">
+            ⚠️ Please enter a URL before checking!
+          </div>
         </form>
 
-        <!-- Result -->
-        <div
-          id="result-section"
-          {%
-          if
-          not
-          predict
-          %}style="display:none"
-          {%
-          endif
-          %}
-        >
+        <!-- Result + Explanation -->
+        <div id="result-section" {% if not predict %}style="display:none"{% endif %}>
           {% if predict %}
           <div class="mt-5">
-            {% if "Phishing" in predict %} {% if risk == "HIGH" %}
-            <div
-              class="inline-block bg-red-600 pulse-red px-4 py-3 rounded-xl font-semibold"
-            >
-              🚨 {{ predict }}
-            </div>
-            {% elif risk == "MEDIUM" %}
-            <div
-              class="inline-block bg-orange-500 px-4 py-3 rounded-xl font-semibold"
-            >
-              ⚠️ {{ predict }}
-            </div>
+            {% if "Phishing" in predict %}
+              {% if risk == "HIGH" %}
+                <div class="inline-block bg-red-600 pulse-red px-4 py-3 rounded-xl font-semibold">🚨 {{ predict }}</div>
+              {% elif risk == "MEDIUM" %}
+                <div class="inline-block bg-orange-500 px-4 py-3 rounded-xl font-semibold">⚠️ {{ predict }}</div>
+              {% else %}
+                <div class="inline-block bg-yellow-500 px-4 py-3 rounded-xl font-semibold">⚠️ {{ predict }}</div>
+              {% endif %}
+            {% elif "Error" in predict or "error" in predict %}
+              <div class="inline-block bg-gray-600 px-4 py-3 rounded-xl font-semibold">⚠️ {{ predict }}</div>
             {% else %}
-            <div
-              class="inline-block bg-yellow-500 px-4 py-3 rounded-xl font-semibold"
-            >
-              ⚠️ {{ predict }}
-            </div>
-            {% endif %} {% elif "Error" in predict or "error" in predict %}
-            <div
-              class="inline-block bg-gray-600 px-4 py-3 rounded-xl font-semibold"
-            >
-              ⚠️ {{ predict }}
-            </div>
-
-            {% else %}
-            <div
-              class="inline-block bg-green-600 px-4 py-3 rounded-xl font-semibold"
-            >
-              ✅ {{ predict }}
-            </div>
+              <div class="inline-block bg-green-600 px-4 py-3 rounded-xl font-semibold">✅ {{ predict }}</div>
             {% endif %}
           </div>
-          {% endif %} {% if explanation %}
+          {% endif %}
+
+          {% if explanation %}
           <div class="mt-5 text-left glass p-3 sm:p-4">
             <h3 class="font-bold mb-2">💡 Why this result?</h3>
             <ul class="list-disc ml-5 text-sm space-y-1">
-              {% for item in explanation %}
-              <li>{{ item }}</li>
-              {% endfor %}
+              {% for item in explanation %}<li>{{ item }}</li>{% endfor %}
             </ul>
           </div>
           {% endif %}
         </div>
 
         <!-- Tips -->
-        <div id="tips-section" {% if predict %}style="display:none" {% endif %}>
+        <div id="tips-section" {% if predict %}style="display:none"{% endif %}>
           <div class="mt-5 text-left text-white/50 text-xs space-y-1">
             <p>💡 Include the full URL with https:// or http://</p>
             <p>💡 Try testing known safe sites like https://www.google.com</p>
             <p>💡 Suspicious TLDs like .tk .ml .xyz .ru are red flags</p>
           </div>
         </div>
+
       </div>
     </section>
 
-    <!-- JS (SAFE VERSION) -->
     <script>
-      const urlInput = document.querySelector('input[name="url"]');
+      const urlInput     = document.getElementById('url-input');
+      const urlForm      = document.getElementById('url-form');
+      const resultSection = document.getElementById('result-section');
+      const tipsSection  = document.getElementById('tips-section');
+      const emptyWarning = document.getElementById('empty-warning');
 
-      if (urlInput) {
-        const resultSection = document.getElementById("result-section");
-        const tipsSection = document.getElementById("tips-section");
+      // Block submit if empty — show warning + shake input
+      urlForm.addEventListener('submit', function (e) {
+        if (urlInput.value.trim() === '') {
+          e.preventDefault();
 
-        urlInput.addEventListener("input", function () {
-          if (this.value.trim() === "") {
-            if (resultSection) resultSection.style.display = "none";
-            if (tipsSection) tipsSection.style.display = "block";
-          } else {
-            if (tipsSection) tipsSection.style.display = "none";
-          }
-        });
-      }
+          // Show warning
+          emptyWarning.classList.remove('hidden');
+
+          // Shake the input
+          urlInput.classList.add('shake');
+          urlInput.addEventListener('animationend', () => {
+            urlInput.classList.remove('shake');
+          }, { once: true });
+
+          // Focus input
+          urlInput.focus();
+          return;
+        }
+
+        // Hide warning if valid
+        emptyWarning.classList.add('hidden');
+      });
+
+      // Hide warning as soon as user starts typing
+      urlInput.addEventListener('input', function () {
+        emptyWarning.classList.add('hidden');
+
+        if (this.value.trim() === '') {
+          if (resultSection) resultSection.style.display = 'none';
+          if (tipsSection)   tipsSection.style.display   = 'block';
+        } else {
+          if (tipsSection) tipsSection.style.display = 'none';
+        }
+      });
     </script>
   </body>
 </html>
