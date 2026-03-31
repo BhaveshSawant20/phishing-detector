@@ -225,6 +225,14 @@ def build_explanation(url, result):
         if result['prob'] < 0.20:
             reasons.append(f"Very low phishing probability from ML model ({result['confidence']}%)")
 
+    # --- TLD context for non-standard domains ---
+    if tld not in ['com','org','net','gov','edu','in','co','io','uk','au','ca','de','fr','jp'] and tld not in SUSPICIOUS_TLDS:
+        reasons.append(f"Non-standard top-level domain (.{tld}) — not a commonly used legitimate TLD")
+
+    # --- No HTTPS signal for good results ---
+    if result['label'] == 'bad' and parsed.scheme == 'https' and not any('HTTP' in r for r in reasons):
+        reasons.append("Note: Site uses HTTPS but this alone does not guarantee safety — phishing sites also use HTTPS")
+
     # --- Fallback ---
     if result['label'] == 'bad' and not reasons:
         reasons.append("Suspicious structural patterns detected in the URL")
