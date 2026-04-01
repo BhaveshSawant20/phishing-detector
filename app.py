@@ -43,7 +43,17 @@ TRUSTED_DOMAINS = {
     'pypi.org','anaconda.com','heroku.com','vercel.app',
     'gmail.com','outlook.com','yahoo.com','protonmail.com',
     'ebay.com','walmart.com','flipkart.com','shopify.com',
-    'irctc.co.in','sbi.co.in','hdfcbank.com','icicibank.com'
+    'irctc.co.in','sbi.co.in','hdfcbank.com','icicibank.com',
+    'axisbank.com','kotakbank.com','yesbank.in','pnbindia.in',
+    # Indian e-commerce & lifestyle
+    'nykaa.com','myntra.com','meesho.com','snapdeal.com',
+    'paytm.com','phonepe.com','razorpay.com','zomato.com',
+    'swiggy.com','bigbasket.com','blinkit.com','zepto.com',
+    'makemytrip.com','goibibo.com','cleartrip.com','ixigo.com',
+    'bookmyshow.com','justdial.com','indiamart.com','naukri.com',
+    # Social media
+    'instagram.com','whatsapp.com','telegram.org','snapchat.com',
+    'tiktok.com','discord.com','twitch.tv','pinterest.com'
 }
 
 # ============================================================
