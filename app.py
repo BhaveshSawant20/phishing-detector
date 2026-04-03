@@ -919,6 +919,18 @@ TRUSTED_DOMAINS = {
     'netlify.app','render.com','fly.dev','huggingface.co',
     'github.io','gitlab.io','replit.app','glitch.me',
     'onrender.com','cyclic.app','adaptable.app',
+    # Education & productivity
+    'udemy.com','coursera.org','edx.org','khanacademy.org',
+    'notion.so','figma.com','canva.com','trello.com',
+    'dropbox.com','drive.google.com','docs.google.com',
+    'hubspot.com','salesforce.com','atlassian.com',
+    'mailchimp.com','zoom.us','slack.com','notion.so',
+    'adobe.com','medium.com','substack.com','wordpress.com',
+    'wix.com','squarespace.com','webflow.io','carrd.co',
+    # News & media
+    'espn.com','forbes.com','techcrunch.com','theverge.com',
+    'wired.com','cnn.com','reuters.com','apnews.com',
+    'timesofindia.com','ndtv.com','hindustantimes.com',
 }
 
 # ============================================================
@@ -1264,14 +1276,31 @@ def home():
             has_ip       = bool(re.search(r'(\d{1,3}\.){3}\d{1,3}', parsed_check.netloc))
             sus_tld      = tld_check in SUSPICIOUS_TLDS
 
-            if result['label'] == 'bad' and result['prob'] < 0.85 and not has_ip and not sus_tld:
+            # GSB override: if Google says safe AND no strong structural signals → trust GSB
+            gsb_overrides = (
+                gsb["is_safe"] == True
+                and not has_ip
+                and not sus_tld
+                and result['prob'] < 0.95  # only override if not extremely confident
+            )
+
+            if result['label'] == 'bad' and (result['prob'] < 0.85 and not has_ip and not sus_tld):
                 safe_conf   = round((1 - result['prob']) * 100, 1)
                 predict     = f"✅ Safe — {safe_conf}% confidence"
                 risk        = "LOW"
                 explanation = ["No strong phishing signals detected (no IP, no suspicious TLD)"]
-                # Add GSB safe signal if available
                 if gsb["is_safe"] == True:
                     explanation.insert(0, "✅ Verified safe by Google Safe Browsing API")
+            elif result['label'] == 'bad' and gsb_overrides:
+                # GSB says safe — downgrade phishing result
+                safe_conf   = round((1 - result['prob']) * 100, 1)
+                predict     = f"✅ Safe — Verified by Google Safe Browsing"
+                risk        = "LOW"
+                explanation = [
+                    "✅ Google Safe Browsing API confirms this site is not flagged as malicious",
+                    "ML model flagged this URL but Google's live database overrides it",
+                    f"ML confidence was {result['confidence']}% — consider verifying manually if unsure",
+                ]
             elif result['label'] == 'bad':
                 predict = f"🚨 Phishing — {result['confidence']}% ({result['risk']})"
                 risk    = result['risk']
@@ -1280,7 +1309,7 @@ def home():
                 predict   = f"✅ Safe — {safe_conf}% confidence"
                 risk      = result['risk']
                 if gsb["is_safe"] == True:
-                    explanation.insert(0, "✅ Not flagged by Google Safe Browsing API")
+                    explanation.insert(0, "✅ Verified safe by Google Safe Browsing API")
 
             session["result"] = {
                 "predict":     predict,
