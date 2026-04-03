@@ -919,6 +919,9 @@ TRUSTED_DOMAINS = {
     'netlify.app','render.com','fly.dev','huggingface.co',
     'github.io','gitlab.io','replit.app','glitch.me',
     'onrender.com','cyclic.app','adaptable.app',
+    # Legitimate sites with unusual TLDs
+    'dev.to','hashnode.dev','daily.dev','bit.ly',
+    'itch.io','product.hunt','t.co','youtu.be',
     # Education & productivity
     'udemy.com','coursera.org','edx.org','khanacademy.org',
     'notion.so','figma.com','canva.com','trello.com',
@@ -1288,8 +1291,11 @@ def home():
             #   4. ML bad + high confidence        → PHISHING
             #   5. ML good                         → SAFE
 
-            gsb_says_safe   = gsb["is_safe"] == True
-            strong_signals  = has_ip or sus_tld  # structural red flags that override GSB
+            gsb_says_safe  = gsb["is_safe"] == True
+            # Strong signals = IP address (always suspicious) OR
+            # suspicious TLD + high ML confidence (both together = strong signal)
+            # A suspicious TLD alone is NOT enough to override GSB — dev.to is a real site
+            strong_signals = has_ip or (sus_tld and result['prob'] >= 0.95)
 
             if gsb_says_safe and not strong_signals:
                 # GSB verified safe and no hard structural red flags → SAFE
