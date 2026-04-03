@@ -1276,39 +1276,62 @@ def home():
             has_ip       = bool(re.search(r'(\d{1,3}\.){3}\d{1,3}', parsed_check.netloc))
             sus_tld      = tld_check in SUSPICIOUS_TLDS
 
-            # GSB override: if Google says safe AND no strong structural signals → trust GSB
-            gsb_overrides = (
-                gsb["is_safe"] == True
-                and not has_ip
-                and not sus_tld
-                and result['prob'] < 0.95  # only override if not extremely confident
-            )
+            # ── Decision Logic ──────────────────────────────
+            #
+            # GSB is the primary authority for SAFE decisions.
+            # ML model is the primary authority for PHISHING decisions.
+            #
+            # Priority:
+            #   1. GSB safe + no IP + no sus TLD  → SAFE  (GSB wins, no threshold limit)
+            #   2. ML bad + has_ip or sus_tld      → PHISHING (structural red flags win)
+            #   3. ML bad + borderline (<0.85)     → SAFE  (safety net)
+            #   4. ML bad + high confidence        → PHISHING
+            #   5. ML good                         → SAFE
 
-            if result['label'] == 'bad' and (result['prob'] < 0.85 and not has_ip and not sus_tld):
+            gsb_says_safe   = gsb["is_safe"] == True
+            strong_signals  = has_ip or sus_tld  # structural red flags that override GSB
+
+            if gsb_says_safe and not strong_signals:
+                # GSB verified safe and no hard structural red flags → SAFE
+                # This handles Udemy, Notion, HubSpot etc. without needing them in trusted list
+                safe_conf = round((1 - result['prob']) * 100, 1)
+                predict   = f"✅ Safe — Verified by Google Safe Browsing"
+                risk      = "LOW"
+                explanation = [
+                    "✅ Google Safe Browsing API confirms this site is not flagged as malicious",
+                ]
+                if url_input.startswith("https://"):
+                    explanation.append("Uses HTTPS — connection is encrypted and secure")
+                if not has_ip:
+                    explanation.append("Uses a proper domain name, not a raw IP address")
+                if result['prob'] < 0.50:
+                    explanation.append(f"Low phishing probability from ML model ({result['confidence']}%)")
+                else:
+                    explanation.append(f"Note: ML model scored {result['confidence']}% — GSB database overrides this as site is not flagged")
+
+            elif result['label'] == 'bad' and strong_signals:
+                # Hard structural signals (IP or suspicious TLD) → trust ML even over GSB
+                predict = f"🚨 Phishing — {result['confidence']}% ({result['risk']})"
+                risk    = result['risk']
+
+            elif result['label'] == 'bad' and result['prob'] < 0.85:
+                # Borderline ML prediction with no strong signals → safe
                 safe_conf   = round((1 - result['prob']) * 100, 1)
                 predict     = f"✅ Safe — {safe_conf}% confidence"
                 risk        = "LOW"
                 explanation = ["No strong phishing signals detected (no IP, no suspicious TLD)"]
-                if gsb["is_safe"] == True:
-                    explanation.insert(0, "✅ Verified safe by Google Safe Browsing API")
-            elif result['label'] == 'bad' and gsb_overrides:
-                # GSB says safe — downgrade phishing result
-                safe_conf   = round((1 - result['prob']) * 100, 1)
-                predict     = f"✅ Safe — Verified by Google Safe Browsing"
-                risk        = "LOW"
-                explanation = [
-                    "✅ Google Safe Browsing API confirms this site is not flagged as malicious",
-                    "ML model flagged this URL but Google's live database overrides it",
-                    f"ML confidence was {result['confidence']}% — consider verifying manually if unsure",
-                ]
+
             elif result['label'] == 'bad':
+                # High confidence phishing
                 predict = f"🚨 Phishing — {result['confidence']}% ({result['risk']})"
                 risk    = result['risk']
+
             else:
+                # ML says good
                 safe_conf = round((1 - result['prob']) * 100, 1)
                 predict   = f"✅ Safe — {safe_conf}% confidence"
                 risk      = result['risk']
-                if gsb["is_safe"] == True:
+                if gsb_says_safe:
                     explanation.insert(0, "✅ Verified safe by Google Safe Browsing API")
 
             session["result"] = {
