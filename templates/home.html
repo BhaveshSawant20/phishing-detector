@@ -8,6 +8,8 @@
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
     <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
     <link rel="icon" type="image/png" sizes="192x192" href="{{ url_for('static', filename='android-chrome-192x192.png') }}">
+
+    <!-- Favicon -->
     <style>
       html, body { min-height: 100%; margin: 0; padding: 0; }
       body {
@@ -44,7 +46,6 @@
       }
       .pulse-red { animation: pulse-red 1.5s infinite; }
 
-      /* Empty input warning shake */
       @keyframes shake {
         0%, 100% { transform: translateX(0); }
         20%       { transform: translateX(-6px); }
@@ -53,10 +54,25 @@
         80%       { transform: translateX(4px); }
       }
       .shake { animation: shake 0.4s ease; }
+
+      @keyframes spin { to { transform: rotate(360deg); } }
+      .page-content { animation: fadeIn 0.25s ease; }
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(6px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
     </style>
   </head>
 
   <body class="text-white">
+
+    <!-- Page transition overlay -->
+    <div id="page-overlay" style="position:fixed;inset:0;z-index:9999;background:#0f0f1a;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.2s ease;">
+      <div style="text-align:center">
+        <div style="width:40px;height:40px;border-radius:50%;border:3px solid rgba(255,255,255,0.1);border-top-color:#6366f1;animation:spin 0.7s linear infinite;margin:0 auto 12px;"></div>
+        <p style="color:rgba(255,255,255,0.5);font-size:0.8rem;font-family:Inter,sans-serif;">Loading...</p>
+      </div>
+    </div>
 
     <!-- Navbar -->
     <nav class="fixed top-0 left-0 w-full bg-black/40 backdrop-blur-lg border-b border-white/20 z-50">
@@ -76,13 +92,12 @@
     </nav>
 
     <!-- Main -->
-    <section class="flex justify-center items-center px-2" style="min-height: 100vh; padding-top: 70px;">
+    <section class="page-content flex justify-center items-center px-2" style="min-height: 100vh; padding-top: 70px;">
       <div class="glass w-full max-w-2xl text-center">
 
         <h1 class="text-xl sm:text-2xl font-bold mb-2">🔍 URL Phishing Detector</h1>
         <p class="text-xs sm:text-sm text-white/60 mb-5">Enter any URL to check if it's safe or a phishing site</p>
 
-        <!-- Form — no pattern/required, handled by JS + app.py -->
         <form method="POST" action="{{ url_for('home') }}" id="url-form">
           <div class="flex flex-col sm:flex-row gap-3">
             <input
@@ -93,15 +108,10 @@
               autocomplete="off"
               class="flex-1 p-3 rounded-xl text-black outline-none text-sm w-full"
             />
-            <button
-              type="submit"
-              class="bg-indigo-600 px-6 py-3 rounded-xl hover:bg-indigo-700 text-white text-sm w-full sm:w-auto"
-            >
+            <button type="submit" class="bg-indigo-600 px-6 py-3 rounded-xl hover:bg-indigo-700 text-white text-sm w-full sm:w-auto">
               CHECK URL
             </button>
           </div>
-
-          <!-- Empty input warning (hidden by default) -->
           <div id="empty-warning" class="hidden mt-3 flex items-center justify-center gap-2 bg-yellow-500/20 border border-yellow-400/40 rounded-xl px-4 py-2 text-yellow-300 text-sm">
             ⚠️ Please enter a URL before checking!
           </div>
@@ -119,6 +129,8 @@
               {% else %}
                 <div class="inline-block bg-yellow-500 px-4 py-3 rounded-xl font-semibold">⚠️ {{ predict }}</div>
               {% endif %}
+            {% elif "Suspicious" in predict %}
+              <div class="inline-block bg-orange-600 px-4 py-3 rounded-xl font-semibold">⚠️ {{ predict }}</div>
             {% elif "Error" in predict or "error" in predict %}
               <div class="inline-block bg-gray-600 px-4 py-3 rounded-xl font-semibold">⚠️ {{ predict }}</div>
             {% else %}
@@ -150,45 +162,51 @@
     </section>
 
     <script>
-      const urlInput     = document.getElementById('url-input');
-      const urlForm      = document.getElementById('url-form');
+      const urlInput      = document.getElementById('url-input');
+      const urlForm       = document.getElementById('url-form');
       const resultSection = document.getElementById('result-section');
-      const tipsSection  = document.getElementById('tips-section');
-      const emptyWarning = document.getElementById('empty-warning');
+      const tipsSection   = document.getElementById('tips-section');
+      const emptyWarning  = document.getElementById('empty-warning');
+      const overlay       = document.getElementById('page-overlay');
 
-      // Block submit if empty — show warning + shake input
+      // Block submit if empty
       urlForm.addEventListener('submit', function (e) {
         if (urlInput.value.trim() === '') {
           e.preventDefault();
-
-          // Show warning
           emptyWarning.classList.remove('hidden');
-
-          // Shake the input
           urlInput.classList.add('shake');
-          urlInput.addEventListener('animationend', () => {
-            urlInput.classList.remove('shake');
-          }, { once: true });
-
-          // Focus input
+          urlInput.addEventListener('animationend', () => urlInput.classList.remove('shake'), { once: true });
           urlInput.focus();
           return;
         }
-
-        // Hide warning if valid
         emptyWarning.classList.add('hidden');
       });
 
-      // Hide warning as soon as user starts typing
+      // Clear warning + tips logic on input
       urlInput.addEventListener('input', function () {
         emptyWarning.classList.add('hidden');
-
-        // Only hide result + show tips when input is fully cleared
-        // Tips stay visible while typing — they disappear only when result arrives
         if (this.value.trim() === '') {
           if (resultSection) resultSection.style.display = 'none';
           if (tipsSection)   tipsSection.style.display   = 'block';
         }
+        // Tips stay visible while typing
+      });
+
+      // Nav transitions + image preloading
+      document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('nav a').forEach(link => {
+          link.addEventListener('click', function (e) {
+            const href = this.getAttribute('href');
+            if (!href || href.startsWith('#')) return;
+            e.preventDefault();
+            overlay.style.opacity = '1';
+            overlay.style.pointerEvents = 'all';
+            setTimeout(() => { window.location.href = href; }, 150);
+          });
+        });
+        ['shivamani.png','yash.png','yugant.png','bhavesh.png','truelink.png','background.png'].forEach(img => {
+          const i = new Image(); i.src = '/static/' + img;
+        });
       });
     </script>
   </body>

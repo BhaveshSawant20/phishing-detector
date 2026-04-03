@@ -937,6 +937,29 @@ TRUSTED_DOMAINS = {
 }
 
 # ============================================================
+# Piracy / Suspicious Site Detection
+# ============================================================
+PIRACY_TLDS = {"to","sh","live","gmbh","mov","cam","tv","ws","ag","si","tc","icu"}
+
+PIRACY_KEYWORDS = [
+    "movies","flix","flixer","anime","torrent","putlocker",
+    "fmovie","123movie","yesmovie","fullmovie","hd4k","vega",
+    "flixtor","watchseries","movierulz","tamilrockers",
+    "bollyflix","hdmovies","afilmywap","filmywap","9xmovies",
+    "pirate","warez","rarbg","1337x","thepiratebay",
+]
+
+def is_piracy_site(url):
+    parsed  = urlparse(url)
+    netloc  = parsed.netloc.lower()
+    tld     = netloc.split(".")[-1] if "." in netloc else ""
+    url_low = url.lower()
+    has_piracy_keyword = any(w in url_low for w in PIRACY_KEYWORDS)
+    has_piracy_tld     = tld in PIRACY_TLDS
+    return has_piracy_keyword and has_piracy_tld
+
+
+# ============================================================
 # Google Safe Browsing API
 # ============================================================
 SAFE_BROWSING_KEY = os.environ.get("GOOGLE_SAFE_BROWSING_KEY", "")
@@ -1242,7 +1265,28 @@ def home():
             }
             return redirect(url_for("home"))
 
-        # ── Step 2: Trusted domain shortcut ───────────────
+        # Step 2a: Piracy / suspicious site check
+        if is_piracy_site(url_input):
+            try:
+                ml   = predict_url(url_input)
+                conf = ml["confidence"]
+            except:
+                conf = 99.0
+            session["result"] = {
+                "predict":     f"⚠️ Suspicious Site Detected — {conf}% (HIGH risk)",
+                "risk":        "HIGH",
+                "explanation": [
+                    "This site appears to be an unofficial streaming or piracy website",
+                    "Piracy sites often contain malicious ads, malware, and data trackers",
+                    "Visiting such sites may expose your device to security risks",
+                    "Content on this site may be illegally distributed copyrighted material",
+                    f"ML model confidence: {conf}%",
+                ],
+                "url": url_input
+            }
+            return redirect(url_for("home"))
+
+        # Step 2b: Trusted domain shortcut
         if is_trusted_domain(url_input):
             parsed_t = urlparse(url_input)
             tld_t    = parsed_t.netloc.split('.')[-1] if '.' in parsed_t.netloc else ''
