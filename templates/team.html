@@ -1,219 +1,309 @@
+```html
 <!doctype html>
+
 <html lang="en">
+
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<script src="https://cdn.tailwindcss.com"></script>
-<title>True Link</title>
-<link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
-<link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
-<link rel="icon" type="image/png" sizes="192x192" href="{{ url_for('static', filename='android-chrome-192x192.png') }}">
-<style>
-  html, body {
-    min-height: 100%;
-    margin: 0;
-    padding: 0;
-  }
 
-  body {
-    background: url('{{ url_for("static", filename="background.png") }}') no-repeat center center fixed;
-    background-size: cover;
-    background-color: #0f0f1a;
-    font-family: 'Inter', sans-serif;
-    min-height: 100vh;
-  }
+  <meta charset="utf-8">
 
-  .glass {
-    background: rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(20px);
-    border-radius: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.15);
-    padding: 1.5rem;
-    margin: 1rem;
-  }
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  nav a { transition: all 0.2s ease; }
+  <script src="https://cdn.tailwindcss.com"></script>
 
-  .avatar-wrap {
-    width: 6rem;
-    height: 6rem;
-    border-radius: 9999px;
-    overflow: hidden;
-    margin: 0 auto;
-    background: rgba(99,102,241,0.3);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5rem;
-    border: 2px solid rgba(255,255,255,0.2);
-  }
+  <title>True Link</title>
 
-  .avatar-wrap img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+  <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
+  <link rel="icon" type="image/png" sizes="192x192" href="{{ url_for('static', filename='android-chrome-192x192.png') }}">
 
-  /* 🔥 Improved card */
-  .member-card {
-    transition: all 0.25s ease;
-    border: 1px solid rgba(99,102,241,0.3);
-    border-radius: 16px;
-    padding: 1rem;
-  }
+  <style>
 
-  .member-card:hover {
-    transform: translateY(-6px) scale(1.03);
-    box-shadow: 0 12px 35px rgba(0,0,0,0.35);
-    border-color: rgba(99,102,241,0.8);
-  }
+    html, body {
+      min-height: 100%;
+      margin: 0;
+      padding: 0;
+    }
 
-</style>
+    body {
+      background: url('{{ url_for("static", filename="background.png") }}') no-repeat center center fixed;
+      background-size: cover;
+      background-color: #0f0f1a;
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+    }
+
+    .glass {
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+      padding: 1.5rem;
+      margin: 1rem;
+    }
+
+    nav a {
+      transition: all 0.2s ease;
+    }
+
+    .avatar-wrap {
+      width: 6rem;
+      height: 6rem;
+      border-radius: 9999px;
+      overflow: hidden;
+      margin: 0 auto;
+      background: rgba(99,102,241,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      border: 2px solid rgba(255,255,255,0.2);
+    }
+
+    .avatar-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Improved card */
+    .member-card {
+      transition: all 0.25s ease;
+      border: 1px solid rgba(99,102,241,0.3);
+      border-radius: 16px;
+      padding: 1rem;
+    }
+
+    .member-card:hover {
+      transform: translateY(-6px) scale(1.03);
+      box-shadow: 0 12px 35px rgba(0,0,0,0.35);
+      border-color: rgba(99,102,241,0.8);
+    }
+
+  </style>
+
 </head>
 
 <body class="text-white">
 
-<!-- Navbar -->
-<nav class="fixed top-0 left-0 w-full bg-black/40 backdrop-blur-lg border-b border-white/20 z-50">
-  <div class="flex flex-wrap items-center justify-between px-3 sm:px-6 py-3 sm:py-4">
+  <!-- Navbar -->
 
-    <div class="flex items-center">
-      <img src="{{ url_for('static', filename='truelink.png') }}"
-           class="h-10 sm:h-14 md:h-16 lg:h-20 w-auto">
-    </div>
+  <nav class="fixed top-0 left-0 w-full bg-black/40 backdrop-blur-lg border-b border-white/20 z-50">
 
-    <div class="w-full sm:w-auto order-3 sm:order-2 text-center sm:absolute sm:left-1/2 sm:-translate-x-1/2 mt-2 sm:mt-0">
-      <span class="text-base sm:text-xl md:text-2xl font-bold">
-        True Link
-      </span>
-    </div>
+    <div class="flex flex-wrap items-center justify-between px-3 sm:px-6 py-3 sm:py-4">
 
-    <div class="flex items-center gap-3 sm:gap-6 md:gap-8 text-xs sm:text-sm md:text-base font-semibold order-2 sm:order-3">
-      <a href="{{ url_for('home') }}"
-         class="{% if request.path == '/' %}text-indigo-400{% else %}text-white{% endif %} hover:text-indigo-300">
-        Home
-      </a>
+      <div class="flex items-center">
 
-      <a href="{{ url_for('team') }}"
-         class="{% if request.path == '/team' %}text-indigo-400{% else %}text-white{% endif %} hover:text-indigo-300">
-        Team
-      </a>
+        <img src="{{ url_for('static', filename='truelink.png') }}"
+             class="h-10 sm:h-14 md:h-16 lg:h-20 w-auto">
 
-      <a href="{{ url_for('details') }}"
-         class="{% if request.path == '/details' %}text-indigo-400{% else %}text-white{% endif %} hover:text-indigo-300">
-        Details
-      </a>
-    </div>
+      </div>
 
-  </div>
-</nav>
+      <div class="w-full sm:w-auto order-3 sm:order-2 text-center sm:absolute sm:left-1/2 sm:-translate-x-1/2 mt-2 sm:mt-0">
 
-```html
-<!-- Team Section -->
-<div class="pt-28 pb-12 px-2">
-  <section class="flex justify-center mt-4">
-    <div class="glass w-full max-w-5xl text-center">
+        <span class="text-base sm:text-xl md:text-2xl font-bold">
+          True Link
+        </span>
 
-      <h2 class="text-2xl sm:text-3xl font-bold mb-1">
-        👥 Meet the Team
-      </h2>
+      </div>
 
-      <p class="text-white/50 text-xs sm:text-sm mb-6">
-        The people behind True Link
-      </p>
+      <div class="flex items-center gap-3 sm:gap-6 md:gap-8 text-xs sm:text-sm md:text-base font-semibold order-2 sm:order-3">
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+        <a href="{{ url_for('home') }}"
+           class="{% if request.path == '/' %}text-indigo-400{% else %}text-white{% endif %} hover:text-indigo-300">
 
-        <!-- Sanskruti -->
-        <a href="https://www.linkedin.com/in/sanskruti-yadav-436456339/"
-           target="_blank"
-           rel="noopener noreferrer"
-           class="member-card cursor-pointer">
-
-          <div class="avatar-wrap">
-            <img src="{{ url_for('static', filename='sanskruti.png') }}"
-                 alt="Sanskruti Yadav"
-                 onerror="this.style.display='none'; this.parentNode.innerHTML='👤';">
-          </div>
-
-          <h3 class="mt-3 font-bold">
-            Sanskruti Yadav
-          </h3>
-
-          <p class="text-indigo-300 text-sm">
-            Frontend Developer
-          </p>
-
-          <p class="text-white/70 text-xs mt-2">
-            Designed and developed the user interface, implemented the responsive
-            frontend, and worked on the overall visual experience of True Link.
-          </p>
+          Home
 
         </a>
 
+        <a href="{{ url_for('team') }}"
+           class="{% if request.path == '/team' %}text-indigo-400{% else %}text-white{% endif %} hover:text-indigo-300">
 
-        <!-- Viraj -->
-        <a href="https://www.linkedin.com/in/viraj-pukale-53b561314/"
-           target="_blank"
-           rel="noopener noreferrer"
-           class="member-card cursor-pointer">
-
-          <div class="avatar-wrap">
-            <img src="{{ url_for('static', filename='viraj.png') }}"
-                 alt="Viraj Pukale"
-                 onerror="this.style.display='none'; this.parentNode.innerHTML='👤';">
-          </div>
-
-          <h3 class="mt-3 font-bold">
-            Viraj Pukale
-          </h3>
-
-          <p class="text-indigo-300 text-sm">
-            Backend Developer
-          </p>
-
-          <p class="text-white/70 text-xs mt-2">
-            Developed the Flask backend, handled API routing and URL processing,
-            and integrated the phishing detection model with the application.
-          </p>
+          Team
 
         </a>
 
+        <a href="{{ url_for('details') }}"
+           class="{% if request.path == '/details' %}text-indigo-400{% else %}text-white{% endif %} hover:text-indigo-300">
 
-        <!-- Bhavesh -->
-        <a href="https://www.linkedin.com/in/bhaveshsawant20/"
-           target="_blank"
-           rel="noopener noreferrer"
-           class="member-card cursor-pointer">
-
-          <div class="avatar-wrap">
-            <img src="{{ url_for('static', filename='bhavesh.png') }}"
-                 alt="Bhavesh Sawant"
-                 onerror="this.style.display='none'; this.parentNode.innerHTML='👤';">
-          </div>
-
-          <h3 class="mt-3 font-bold">
-            Bhavesh Sawant
-          </h3>
-
-          <p class="text-indigo-300 text-sm">
-            Data Analyst & Project Lead
-          </p>
-
-          <p class="text-white/70 text-xs mt-2">
-            Led the project end-to-end, handled data analysis and model-related work,
-            coordinated the team, reviewed implementation, and tested the system.
-          </p>
+          Details
 
         </a>
 
       </div>
+
     </div>
-  </section>
-</div>
-```
+
+  </nav>
+
+
+  <!-- Team Section -->
+
+  <div class="pt-28 pb-12 px-2">
+
+    <section class="flex justify-center mt-4">
+
+      <div class="glass w-full max-w-5xl text-center">
+
+        <h2 class="text-2xl sm:text-3xl font-bold mb-1">
+          👥 Meet the Team
+        </h2>
+
+        <p class="text-white/50 text-xs sm:text-sm mb-6">
+          The people behind True Link
+        </p>
+
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+
+
+          <!-- Sanskruti -->
+
+          <a href="https://www.linkedin.com/in/sanskruti-yadav-436456339/"
+             target="_blank"
+             rel="noopener noreferrer"
+             class="member-card cursor-pointer">
+
+            <div class="avatar-wrap">
+
+              <img src="{{ url_for('static', filename='sanskruti.png') }}"
+                   alt="Sanskruti Yadav"
+                   onerror="this.style.display='none'; this.parentNode.innerHTML='👤';">
+
+            </div>
+
+            <h3 class="mt-3 font-bold">
+              Sanskruti Yadav
+            </h3>
+
+            <p class="text-indigo-300 text-sm">
+              Frontend Developer
+            </p>
+
+            <p class="text-white/40 text-xs">
+              IEN: 12327007
+            </p>
+
+            <p class="text-white/70 text-xs mt-2">
+
+              Designed and developed the user interface, implemented the responsive
+              frontend, and worked on the overall visual experience of True Link.
+
+            </p>
+
+          </a>
+
+
+          <!-- Viraj -->
+
+          <a href="https://www.linkedin.com/in/viraj-pukale-53b561314/"
+             target="_blank"
+             rel="noopener noreferrer"
+             class="member-card cursor-pointer">
+
+            <div class="avatar-wrap">
+
+              <img src="{{ url_for('static', filename='viraj.png') }}"
+                   alt="Viraj Pukale"
+                   onerror="this.style.display='none'; this.parentNode.innerHTML='👤';">
+
+            </div>
+
+            <h3 class="mt-3 font-bold">
+              Viraj Pukale
+            </h3>
+
+            <p class="text-indigo-300 text-sm">
+              Backend Developer
+            </p>
+
+            <p class="text-white/40 text-xs">
+              IEN: 12317004
+            </p>
+
+            <p class="text-white/70 text-xs mt-2">
+
+              Developed the Flask backend, handled API routing and URL processing,
+              and integrated the phishing detection model with the application.
+
+            </p>
+
+          </a>
+
+
+          <!-- Bhavesh -->
+
+          <a href="https://www.linkedin.com/in/bhaveshsawant20/"
+             target="_blank"
+             rel="noopener noreferrer"
+             class="member-card cursor-pointer">
+
+            <div class="avatar-wrap">
+
+              <img src="{{ url_for('static', filename='bhavesh.png') }}"
+                   alt="Bhavesh Sawant"
+                   onerror="this.style.display='none'; this.parentNode.innerHTML='👤';">
+
+            </div>
+
+            <h3 class="mt-3 font-bold">
+              Bhavesh Sawant
+            </h3>
+
+            <p class="text-indigo-300 text-sm">
+              Data Analyst & Project Lead
+            </p>
+
+            <p class="text-white/40 text-xs">
+              IEN: 12217028
+            </p>
+
+            <p class="text-white/70 text-xs mt-2">
+
+              Led the project end-to-end, handled data analysis and model-related work,
+              coordinated the team, reviewed implementation, and tested the system.
+
+            </p>
+
+          </a>
+
+
+        </div>
+
+      </div>
+
+    </section>
+
+  </div>
+
+
+  <!-- Image Preloading -->
+
+  <script>
+
+    document.addEventListener('DOMContentLoaded', function () {
+
+      [
+        'sanskruti.png',
+        'viraj.png',
+        'bhavesh.png',
+        'truelink.png',
+        'background.png'
+      ].forEach(img => {
+
+        const i = new Image();
+        i.src = '/static/' + img;
+
+      });
+
+    });
+
+  </script>
 
 
 </body>
+
 </html>
+```
